@@ -35,8 +35,10 @@ def get_front_shoulder_angles(landmarks):
                          landmarks.landmark[11],
                          landmarks.landmark[23]]
 
-        r_shoulder_angle = round(get_angle(right_shoulder), 1)
-        l_shoulder_angle = round(get_angle(left_shoulder), 1)
+        r_shoulder_angle = int(get_angle(right_shoulder))
+        l_shoulder_angle = int(get_angle(left_shoulder))
+        # r_shoulder_angle = round(get_angle(right_shoulder), 1)
+        # l_shoulder_angle = round(get_angle(left_shoulder), 1)
 
         return [r_shoulder_angle, l_shoulder_angle]
     else:

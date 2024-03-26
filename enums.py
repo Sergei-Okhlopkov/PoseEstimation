@@ -10,6 +10,7 @@ class Color(Enum):
     GREY = (134, 136, 138)
     GREEN = (0, 255, 0)
     MAGENTA = (128, 0, 255)
+    LIGHT_GREY = (224, 224, 224)
     RED = (0, 0, 255)
     ROSE = (203, 192, 255)
     ORANGE = (50, 172, 255)

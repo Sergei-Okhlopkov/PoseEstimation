@@ -54,33 +54,31 @@ landMarksStatic = [(15, 21),    # Правый кулак - правый бол�
 
 
 def draw_info(img, fps, angles, r_arm_speed):
-    cv2.rectangle(img, (0, 0), (100, 200), Color.GREY.value, -1)
-    cv2.putText(img, str(int(fps)), (30, 50), cv2.FONT_HERSHEY_PLAIN, 3,
-                (0, 0, 0), 3)
+    cv2.rectangle(img, (0, 0), (150, 200), Color.LIGHT_GREY.value, -1)
 
-    cv2.putText(img,
-                str(angles[0]),
-                (30, 100),
-                cv2.FONT_HERSHEY_PLAIN,
-                3,
-                Color.RED.value,
-                3)
+    cv2.putText(img, "fps", (10, 20), cv2.FONT_HERSHEY_PLAIN, 0.7,
+                Color.BLACK.value, 1)
 
-    cv2.putText(img,
-                str(r_arm_speed),
-                (200, 100),
-                cv2.FONT_HERSHEY_PLAIN,
-                3,
-                Color.VIOLET.value,
-                3)
+    cv2.putText(img, str(int(fps)), (60, 20), cv2.FONT_HERSHEY_PLAIN, 1,
+                Color.BLACK.value, 2)
 
-    cv2.putText(img,
-                str(angles[1]),
-                (30, 150),
-                cv2.FONT_HERSHEY_PLAIN,
-                3,
-                Color.GREEN.value,
-                3)
+    cv2.putText(img, "r_angle", (10, 40), cv2.FONT_HERSHEY_PLAIN, 0.7,
+                Color.BLACK.value, 1)
+    # Правое плечо (угол)
+    cv2.putText(img, str(angles[0]), (60, 40), cv2.FONT_HERSHEY_PLAIN, 1,
+                Color.DODGER_BLUE.value, 2)
+
+    cv2.putText(img, "r_speed", (10, 60), cv2.FONT_HERSHEY_PLAIN, 0.7,
+                Color.BLACK.value, 1)
+    # Правое плечо (скорость)
+    cv2.putText(img, str(r_arm_speed), (60, 60), cv2.FONT_HERSHEY_PLAIN, 1,
+                Color.VIOLET.value, 2)
+
+    cv2.putText(img, "l_angle", (10, 80), cv2.FONT_HERSHEY_PLAIN, 0.7,
+                Color.BLACK.value, 1)
+    # Левое плечо (угол)
+    cv2.putText(img, str(angles[1]), (60, 80), cv2.FONT_HERSHEY_PLAIN, 1,
+                Color.BLUE.value, 2)
 
 
 def draw_pose(img, landmarks, mp_pose, highlight_joints=None):
