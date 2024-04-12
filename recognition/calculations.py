@@ -27,13 +27,17 @@ def get_angle(landmarks):
 
 def get_front_shoulder_angles(landmarks):
     if landmarks:
-        right_shoulder = [landmarks.landmark[14],
-                          landmarks.landmark[12],
-                          landmarks.landmark[24]]
+        right_shoulder = [
+            landmarks.landmark[14],
+            landmarks.landmark[12],
+            landmarks.landmark[24],
+        ]
 
-        left_shoulder = [landmarks.landmark[13],
-                         landmarks.landmark[11],
-                         landmarks.landmark[23]]
+        left_shoulder = [
+            landmarks.landmark[13],
+            landmarks.landmark[11],
+            landmarks.landmark[23],
+        ]
 
         r_shoulder_angle = int(get_angle(right_shoulder))
         l_shoulder_angle = int(get_angle(left_shoulder))
@@ -43,3 +47,9 @@ def get_front_shoulder_angles(landmarks):
         return [r_shoulder_angle, l_shoulder_angle]
     else:
         return [-1, -1]
+
+
+def get_middle_coordinates(x0, y0, x1, y1):
+    xm = int((x0 + x1) / 2)
+    ym = int((y0 + y1) / 2)
+    return xm, ym

@@ -1,13 +1,15 @@
 import time
 import cv2
 import mediapipe as mp
-from render import draw_info, draw_pose
-from calculations import get_front_shoulder_angles
+
+from recognition.joint_data import highlited_joints
+from recognition.render import draw_info, draw_pose
+from recognition.calculations import get_front_shoulder_angles
 
 OUTPUT_TIME = 0.1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     mpDraw = mp.solutions.drawing_utils
     mpPose = mp.solutions.pose
@@ -35,10 +37,8 @@ if __name__ == '__main__':
 
         angles = get_front_shoulder_angles(results.pose_landmarks)
 
-        highlite_joints = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
-
         if results.pose_landmarks:
-            draw_pose(img, results.pose_landmarks, mpPose, highlite_joints)
+            draw_pose(img, results.pose_landmarks, mpPose, highlited_joints)
 
         current_time = time.time()
         delta_t = current_time - start_time
@@ -49,7 +49,6 @@ if __name__ == '__main__':
         fps = 1 / (current_time - previous_time)
         previous_time = current_time
         prev_angles = angles
-
 
         # обновление скорости движения руки каждые OUTPUT_TIME
         if delta_t > OUTPUT_TIME:
