@@ -4,14 +4,14 @@ import mediapipe as mp
 
 from recognition.joint_data import highlited_joints
 from recognition.render import draw_info, draw_pose
-from recognition.calculations import get_front_shoulder_angles
+from recognition.calculations import get_shoulders_angles
 
 OUTPUT_TIME = 0.1
 
 
 if __name__ == "__main__":
 
-    mpDraw = mp.solutions.drawing_utils
+    # mpDraw = mp.solutions.drawing_utils
     mpPose = mp.solutions.pose
     pose = mpPose.Pose()
 
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = pose.process(imgRGB)
 
-        angles = get_front_shoulder_angles(results.pose_landmarks)
+        angles = get_shoulders_angles(results.pose_landmarks)
 
         if results.pose_landmarks:
             draw_pose(img, results.pose_landmarks, mpPose, highlited_joints)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             collected_speed = 0
             start_time = time.time()
 
-        draw_info(img, fps, angles, r_arm_speed)
+        # draw_info(img, fps, angles, r_arm_speed)
 
         cv2.imshow("webCam", img)
         if cv2.waitKey(10) == 27:

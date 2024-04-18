@@ -25,7 +25,7 @@ def get_angle(landmarks):
     return degrees
 
 
-def get_front_shoulder_angles(landmarks):
+def get_shoulders_angles(landmarks):
     if landmarks:
         right_shoulder = [
             landmarks.landmark[14],
@@ -45,6 +45,28 @@ def get_front_shoulder_angles(landmarks):
         # l_shoulder_angle = round(get_angle(left_shoulder), 1)
 
         return [r_shoulder_angle, l_shoulder_angle]
+    else:
+        return [-1, -1]
+
+
+def get_elbows_angles(landmarks):
+    if landmarks:
+        right_elbow = [
+            landmarks.landmark[16],
+            landmarks.landmark[14],
+            landmarks.landmark[12],
+        ]
+
+        left_elbow = [
+            landmarks.landmark[15],
+            landmarks.landmark[13],
+            landmarks.landmark[11],
+        ]
+
+        r_elbow_angle = int(get_angle(right_elbow))
+        l_elbow_angle = int(get_angle(left_elbow))
+
+        return [r_elbow_angle, l_elbow_angle]
     else:
         return [-1, -1]
 
