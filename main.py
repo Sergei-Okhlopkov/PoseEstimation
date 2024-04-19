@@ -19,6 +19,8 @@ def update_elbows_angle(values):
     r_elbow_angle.configure(text=f"{values[1]}")
 
 
+# TODO: заменить все текстовые пременные (цвета) на enum коллекцию
+
 if __name__ == "__main__":
     ctk.set_default_color_theme("dark-blue")
     ctk.set_appearance_mode("dark")
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     fb = make_frame(app, "#2A2A2C")
 
     # Subframes
-    fb_up = make_frame(fb, "yellow")
+    fb_up = make_frame(fb, "#424C58")
     fb_down = make_frame(fb, "#2A2A2C")
 
     # Elements

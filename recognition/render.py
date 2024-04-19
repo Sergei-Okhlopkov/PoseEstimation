@@ -4,6 +4,8 @@ from recognition.calculations import get_middle_coordinates
 from enums import Color
 from recognition.joint_data import joint_to_color
 
+# TODO: описать все взаимодествия и структуры в render.py в отдельный *.md файл
+
 
 def draw_info(img, fps, angles, r_arm_speed):
     cv2.rectangle(img, (0, 0), (150, 200), Color.LIGHT_GREY.value, -1)
@@ -59,12 +61,15 @@ def draw_pose(img, landmarks, mp_pose, highlight_joints=None):
 
     # Основной скелет
     for edge in mp_pose.POSE_CONNECTIONS:
-        joint_x0 = int(landmarks.landmark[edge[0]].x * img.shape[1])
-        joint_y0 = int(landmarks.landmark[edge[0]].y * img.shape[0])
-        joint_x1 = int(landmarks.landmark[edge[1]].x * img.shape[1])
-        joint_y1 = int(landmarks.landmark[edge[1]].y * img.shape[0])
+        if edge[0] > 10 and edge[1] > 10:  # Убираем отрисовку лица
+            joint_x0 = int(landmarks.landmark[edge[0]].x * img.shape[1])
+            joint_y0 = int(landmarks.landmark[edge[0]].y * img.shape[0])
+            joint_x1 = int(landmarks.landmark[edge[1]].x * img.shape[1])
+            joint_y1 = int(landmarks.landmark[edge[1]].y * img.shape[0])
 
-        cv2.line(img, (joint_x0, joint_y0), (joint_x1, joint_y1), Color.WHITE.value, 1)
+            cv2.line(
+                img, (joint_x0, joint_y0), (joint_x1, joint_y1), Color.WHITE.value, 1
+            )
 
         # Отмеченные суставы
         # Целевой сустав первый в edge
@@ -78,11 +83,12 @@ def draw_pose(img, landmarks, mp_pose, highlight_joints=None):
             cv2.line(img, (joint_x1, joint_y1), (xm, ym), joint_to_color[edge[1]], 3)
 
     for i, joint in enumerate(landmarks.landmark):
-        joint_x = int(joint.x * img.shape[1])
-        joint_y = int(joint.y * img.shape[0])
+        if i > 10:  # Убираем отрисовку лица
+            joint_x = int(joint.x * img.shape[1])
+            joint_y = int(joint.y * img.shape[0])
 
-        if i in highlight_joints:
-            cv2.circle(img, (joint_x, joint_y), 4, joint_to_color[i], -1)
-            continue
+            if i in highlight_joints:
+                cv2.circle(img, (joint_x, joint_y), 4, joint_to_color[i], -1)
+                continue
 
-        cv2.circle(img, (joint_x, joint_y), 4, Color.ORANGE.value, -1)
+            cv2.circle(img, (joint_x, joint_y), 4, Color.ORANGE.value, -1)

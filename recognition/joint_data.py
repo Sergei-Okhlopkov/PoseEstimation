@@ -1,20 +1,20 @@
 from enums import Color
 
-highlited_joints = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
+highlited_joints = [11, 12, 13, 14, 23, 24, 25, 26, 27, 28]
 
 joint_to_color = {
     11: Color.BLUE.value,  # Правое плечо
-    12: Color.DODGER_BLUE.value,  # Левое плечо
-    13: Color.CHARTREUSE.value,  # Правый локоть
+    12: Color.BLUE.value,  # Левое плечо
+    13: Color.GREEN.value,  # Правый локоть
     14: Color.GREEN.value,  # Левый локоть
     15: Color.RED.value,  # Правый кулак
     16: Color.ROSE.value,  # Левый кулак
     23: Color.VIOLET.value,  # Правое бедро
-    24: Color.PURPLE.value,  # Левое бедро
-    25: Color.YELLOW.value,  # Правое колено
+    24: Color.VIOLET.value,  # Левое бедро
+    25: Color.CYAN.value,  # Правое колено
     26: Color.CYAN.value,  # Левое колено
-    27: Color.SPRING_GREEN.value,  # Правая лодыжка
-    28: Color.MAGENTA.value,  # Левая лодыжка
+    27: Color.RED.value,  # Правая лодыжка
+    28: Color.RED.value,  # Левая лодыжка
 }
 
 landMarkEdges = [
