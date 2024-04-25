@@ -14,13 +14,13 @@ OUTPUT_TIME = 0.1
 
 
 class VideoPlayer:
-    def __init__(self, app, canvas, video_tool_stripe, callbacks):
+    def __init__(self, app, canvas, video_tool_stripe):  # , callbacks
         self.app = app
         self.canvas = canvas
         self.video_tool_stripe = video_tool_stripe
 
         # Callback функции для отображения в интерфейсе
-        self.callbacks = callbacks
+        # self.callbacks = callbacks
 
         # TODO: вынести кнопки в класс APP
         # Создаем кнопку Play/Pause
@@ -137,12 +137,12 @@ class VideoPlayer:
                     self.start_time = time.time()
 
                 # Вывод всей информации в интерфейс
-                self.update_interface_info(
-                    self.callbacks,
-                    self.shoulders_angles,
-                    self.elbows_angles,
-                    self.shoulders_speed,
-                )
+                # self.update_interface_info(
+                #     self.callbacks,
+                #     self.shoulders_angles,
+                #     self.elbows_angles,
+                #     self.shoulders_speed,
+                # )
                 # self.update_l_elbow_angle(self.l_arm_speed)
 
                 # Преобразуем кадр из BGR (OpenCV) в RGB (PIL)
@@ -174,12 +174,12 @@ class VideoPlayer:
         new_height = int(scale_ratio * image_height)
         return image.resize((new_width, new_height))
 
-    @staticmethod
-    def update_interface_info(
-        callbacks, shoulders_angles, elbows_angles, shoulders_speed
-    ):
-        update_elbows_angle = callbacks["update_elbows_angle"]
-        update_shoulders_angle = callbacks["update_shoulders_angle"]
-
-        update_shoulders_angle(shoulders_angles)
-        update_elbows_angle(elbows_angles)
+    # @staticmethod
+    # def update_interface_info(
+    #     callbacks, shoulders_angles, elbows_angles, shoulders_speed
+    # ):
+    #     update_elbows_angle = callbacks["update_elbows_angle"]
+    #     update_shoulders_angle = callbacks["update_shoulders_angle"]
+    #
+    #     update_shoulders_angle(shoulders_angles)
+    #     update_elbows_angle(elbows_angles)

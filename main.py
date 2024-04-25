@@ -7,9 +7,7 @@ from db.database import Base, engine, SessionLocal
 from db.models import User
 
 # Пересоздали схему БД
-Base.metadata.drop_all(
-    bind=engine
-)  # TODO: добавить файл .env для пересоздания БДпше ыефегы
+Base.metadata.drop_all(bind=engine)  # TODO: добавить файл .env для пересоздания БД
 
 Base.metadata.create_all(bind=engine)
 
