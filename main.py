@@ -2,6 +2,16 @@ import customtkinter as ctk
 
 from app.ctk_helper import make_frame
 from app.videoplayer import VideoPlayer
+from db.crud import create_user
+from db.database import Base, engine, SessionLocal
+from db.models import User
+
+# Пересоздали схему БД
+Base.metadata.drop_all(
+    bind=engine
+)  # TODO: добавить файл .env для пересоздания БДпше ыефегы
+
+Base.metadata.create_all(bind=engine)
 
 l_shoulder_angle = None
 l_elbow_angle = None
@@ -119,5 +129,13 @@ if __name__ == "__main__":
     }
     # Создаем экземпляр класса VideoPlayer
     video_player = VideoPlayer(app, canvas, video_tool_stripe, callbacks)
-
+    user = User(
+        first_name="Сергей",
+        last_name="Охлопков",
+        patronymic="",
+        login="myrza",
+        password="123",
+        email="s_okhlopkov@mail.ru",
+    )
+    create_user(SessionLocal(), user)
     app.mainloop()

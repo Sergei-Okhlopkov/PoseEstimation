@@ -19,3 +19,13 @@ class Color(Enum):
     PURPLE = (255, 0, 128)
     WHITE = (255, 255, 255)
     YELLOW = (0, 255, 255)
+
+
+class ExerciseType(Enum):
+    RIGHT_SHOULDER_ABDUCTION = 1  # отведение правого плеча
+    LEFT_SHOULDER_ABDUCTION = 2  # отведение левого плеча
+    RIGHT_ELBOW_BEND = 3
+    LEFT_ELBOW_BEND = 4
+    RIGHT_SHOULDER_BEND = 5  # сгибание правого плеча
+    LEFT_SHOULDER_BEND = 6  # сгибание левого плеча
+    KNEE_BEND = 7  # приседание
