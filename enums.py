@@ -29,3 +29,17 @@ class ExerciseType(Enum):
     RIGHT_SHOULDER_BEND = 5  # сгибание правого плеча
     LEFT_SHOULDER_BEND = 6  # сгибание левого плеча
     KNEE_BEND = 7  # приседание
+
+
+class UserType(Enum):
+    Patient = 1
+    Doctor = 2
+
+
+class AppColor(Enum):
+    MAIN = "#2A2A2C"
+    SUBMAIN = "#424C58"
+    BUTTON = "#4B9BFB"
+    WHITE = "#FFFFFF"
+    BLACK = "#000000"
+    GREEN = "#00E9A1"

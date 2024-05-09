@@ -14,13 +14,13 @@ OUTPUT_TIME = 0.1
 
 
 class VideoPlayer:
-    def __init__(self, app, canvas, video_tool_stripe):  # , callbacks
+    def __init__(self, app, canvas, video_tool_stripe, callbacks):
         self.app = app
         self.canvas = canvas
         self.video_tool_stripe = video_tool_stripe
 
         # Callback функции для отображения в интерфейсе
-        # self.callbacks = callbacks
+        self.callbacks = callbacks
 
         # TODO: вынести кнопки в класс APP
         # Создаем кнопку Play/Pause
@@ -42,10 +42,11 @@ class VideoPlayer:
         self.play_button.pack(side="left", padx=[20, 50])
         self.pose_button.pack(side="left", padx=[20, 50])
 
+        # TODO: открывать поток только при переключении на фрейм с захватом
         # Открываем видеопоток
         self.capture = cv2.VideoCapture(0)
 
-        self.is_playing = True
+        self.is_playing = False
         self.draw_pose = True
 
         self.previous_time = time.time()
@@ -137,13 +138,12 @@ class VideoPlayer:
                     self.start_time = time.time()
 
                 # Вывод всей информации в интерфейс
-                # self.update_interface_info(
-                #     self.callbacks,
-                #     self.shoulders_angles,
-                #     self.elbows_angles,
-                #     self.shoulders_speed,
-                # )
-                # self.update_l_elbow_angle(self.l_arm_speed)
+                self.update_interface_info(
+                    self.callbacks,
+                    self.shoulders_angles,
+                    self.elbows_angles,
+                    self.shoulders_speed,
+                )
 
                 # Преобразуем кадр из BGR (OpenCV) в RGB (PIL)
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -174,12 +174,12 @@ class VideoPlayer:
         new_height = int(scale_ratio * image_height)
         return image.resize((new_width, new_height))
 
-    # @staticmethod
-    # def update_interface_info(
-    #     callbacks, shoulders_angles, elbows_angles, shoulders_speed
-    # ):
-    #     update_elbows_angle = callbacks["update_elbows_angle"]
-    #     update_shoulders_angle = callbacks["update_shoulders_angle"]
-    #
-    #     update_shoulders_angle(shoulders_angles)
-    #     update_elbows_angle(elbows_angles)
+    @staticmethod
+    def update_interface_info(
+        callbacks, shoulders_angles, elbows_angles, shoulders_speed
+    ):
+        update_elbows_angle = callbacks["update_elbows_angle"]
+        update_shoulders_angle = callbacks["update_shoulders_angle"]
+
+        update_shoulders_angle(shoulders_angles)
+        update_elbows_angle(elbows_angles)
