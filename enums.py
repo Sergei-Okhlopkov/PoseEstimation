@@ -40,6 +40,17 @@ class AppColor(Enum):
     MAIN = "#2A2A2C"
     SUBMAIN = "#424C58"
     BUTTON = "#4B9BFB"
-    WHITE = "#FFFFFF"
     BLACK = "#000000"
     GREEN = "#00E9A1"
+    GREY = "#808080"
+    WHITE = "#FFFFFF"
+
+
+class AppScreen(Enum):
+    REGISTRATION = "registration"
+    AUTH = "auth"
+    EXERCISES = "exercises"
+    MAIN_PATIENT = "main_patient"
+    MAIN_DOCTOR = "main_doctor"
+    STATISTICS_PATIENT = "statistics_patient"
+    STATISTICS_DOCTOR = "statistics_doctor"

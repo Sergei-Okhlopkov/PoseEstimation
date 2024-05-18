@@ -36,6 +36,7 @@ def make_btn(
     fg_color=AppColor.BUTTON.value,
     text_color=AppColor.WHITE.value,
     font_size=36,
+    command=None,
 ):
     return ctk.CTkButton(
         root,
@@ -46,13 +47,57 @@ def make_btn(
         fg_color=fg_color,
         text_color=text_color,
         font=(FONT, font_size),
+        command=command,
     )
+
+
+def make_clickable_lbl(
+    root,
+    text,
+    click=None,
+    font_size=18,
+    text_color=AppColor.WHITE.value,
+):
+    return ClickableLabel(
+        root, text=text, click=click, font_size=font_size, text_color=text_color
+    )
+
+
+class ClickableLabel(ctk.CTkLabel):
+    def __init__(
+        self,
+        master,
+        text,
+        font_size=18,
+        text_color=AppColor.WHITE.value,
+        click=None,
+    ):
+        super().__init__(
+            master, text=text, font=(FONT, font_size), text_color=text_color
+        )
+
+        self.click = click
+
+        self.bind("<Enter>", lambda e: self.configure(cursor="hand2"))
+        self.bind("<Leave>", lambda e: self.configure(cursor="arrow"))
+        self.bind(
+            "<Button-1>", lambda e: self.configure(text_color=AppColor.GREY.value)
+        )
+        self.bind(
+            "<ButtonRelease-1>",
+            self.enter_click_release,
+        )
+
+    def enter_click_release(self, *args):
+        self.configure(text_color=AppColor.WHITE.value)
+        frame = self.click[1]
+        self.click[0](frame)
 
 
 class Entry(ctk.CTkEntry):
     def __init__(
         self,
-        master=None,
+        master,
         placeholder="PLACEHOLDER",
         corner_radius=20,
         font_size=36,

@@ -46,7 +46,7 @@ class VideoPlayer:
         # Открываем видеопоток
         self.capture = cv2.VideoCapture(0)
 
-        self.is_playing = False
+        self.is_playing = True
         self.draw_pose = True
 
         self.previous_time = time.time()
