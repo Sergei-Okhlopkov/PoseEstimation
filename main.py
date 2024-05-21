@@ -110,12 +110,12 @@ if __name__ == "__main__":
 
     # region GRID CONFIG
     # main
-    app.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=1)
-    app.grid_rowconfigure((0, 1, 2, 3), weight=1)
+    app.grid_columnconfigure(list(range(10)), weight=1)
+    app.grid_rowconfigure(list(range(4)), weight=1)
 
     # subframes
-    fb.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
-    fb.grid_rowconfigure((0, 1, 2, 3), weight=1)
+    fb.grid_columnconfigure(list(range(6)), weight=1)
+    fb.grid_rowconfigure(list(range(4)), weight=1)
 
     # endregion
 

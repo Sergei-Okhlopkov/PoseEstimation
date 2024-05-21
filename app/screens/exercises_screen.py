@@ -84,14 +84,12 @@ class ExerciseScreen(ctk.CTkFrame):
 
         # region GRID CONFIG
         # main
-        for c in range(10):
-            self.grid_columnconfigure(c, weight=1)
-        for r in range(4):
-            self.grid_rowconfigure(r, weight=1)
+        self.grid_columnconfigure(list(range(10)), weight=1)
+        self.grid_rowconfigure(list(range(4)), weight=1)
 
         # subframes
-        fb.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
-        fb.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        fb.grid_columnconfigure(list(range(6)), weight=1)
+        fb.grid_rowconfigure(list(range(4)), weight=1)
 
         # endregion
 

@@ -52,9 +52,7 @@ class AuthScreen(ctk.CTkFrame):
 
         # region GRID CONFIG
         # main
-        for c in range(7):
-            auth_area.grid_columnconfigure(c, weight=1)
-        for r in range(6):
-            auth_area.grid_rowconfigure(r, weight=1)
+        auth_area.grid_columnconfigure(list(range(7)), weight=1)
+        auth_area.grid_rowconfigure(list(range(6)), weight=1)
 
         # endregion

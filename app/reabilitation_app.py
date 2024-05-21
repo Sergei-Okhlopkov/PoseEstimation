@@ -4,6 +4,7 @@ from app.screens.auth_screen import AuthScreen
 from app.screens.exercises_screen import ExerciseScreen
 from app.screens.main_patient_screen import MainPatientScreen
 from app.screens.registration_screen import RegistrationScreen
+from app.screens.statistics_patient_screen import StatisticsPatientScreen
 from enums import AppScreen
 
 ctk.set_default_color_theme("dark-blue")
@@ -28,8 +29,7 @@ class ReabilitationApp(ctk.CTk):
         self.create_frames()
 
         # Отображение первого фрейма
-        self.show_frame(AppScreen.REGISTRATION.value)
-        # self.show_frame(AppScreen.EXERCISES.value)
+        self.show_frame(AppScreen.STATISTICS_PATIENT.value)
 
     def create_frames(self):
 
@@ -44,6 +44,11 @@ class ReabilitationApp(ctk.CTk):
 
         auth = AuthScreen(self, self.main_frame, self.session)
         self.frames[AppScreen.AUTH.value] = auth
+
+        statistics_patient = StatisticsPatientScreen(
+            self, self.main_frame, self.session
+        )
+        self.frames[AppScreen.STATISTICS_PATIENT.value] = statistics_patient
 
     def show_frame(self, frame_name):
         # Скрываем все фреймы

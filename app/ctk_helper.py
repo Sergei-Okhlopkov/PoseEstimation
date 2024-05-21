@@ -5,9 +5,20 @@ from enums import AppColor
 FONT = "Inter"
 
 
-def make_frame(root, color=None, corner_radius=0, width=100, height=50):
+def make_frame(
+    root,
+    color=None,
+    corner_radius=0,
+    width=100,
+    height=50,
+):
     return ctk.CTkFrame(
-        root, fg_color=color, corner_radius=corner_radius, width=width, height=height
+        root,
+        fg_color=color,
+        corner_radius=corner_radius,
+        width=width,
+        height=height,
+        border_width=0,
     )
 
 
@@ -37,6 +48,7 @@ def make_btn(
     text_color=AppColor.WHITE.value,
     font_size=36,
     command=None,
+    image=None,
 ):
     return ctk.CTkButton(
         root,
@@ -48,6 +60,7 @@ def make_btn(
         text_color=text_color,
         font=(FONT, font_size),
         command=command,
+        image=image,
     )
 
 
