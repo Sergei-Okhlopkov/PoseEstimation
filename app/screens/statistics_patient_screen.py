@@ -1,8 +1,8 @@
 import customtkinter as ctk
 from pathlib import Path
-from app.ctk_helper import make_frame, make_btn
+from app.ctk_helper import make_frame
 from enums import AppColor, AppScreen
-from PIL import Image, ImageTk
+from PIL import Image
 
 
 class StatisticsPatientScreen(ctk.CTkFrame):
@@ -12,6 +12,10 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         self.spec_name_lbl = None
         self.current_date_lbl = None
         self.dynamic_direction_lbl = None
+        self.exercise_lbl = None
+
+        # Изображения для кнопок
+        arrow_left, arrow_right, cross = get_btns_images()
 
         statistics_area = make_frame(
             self,
@@ -27,10 +31,18 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             pady=30,
         )
 
+        cross_btn = ctk.CTkButton(
+            statistics_area,
+            text=None,
+            image=cross,
+            width=160,
+            fg_color="transparent",
+            command=lambda: controller.show_frame(AppScreen.MAIN_PATIENT.value),
+        )
+
         info_frame = make_frame(
             statistics_area,
-            color=AppColor.GREEN.value,
-            corner_radius=20,
+            color="transparent",
             width=500,
             height=650,
         )
@@ -39,20 +51,21 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         # region CANVAS
         canvas_frame = make_frame(
             statistics_area,
-            color="blue",
+            color=AppColor.MAIN.value,
             corner_radius=20,
         )
         canvas = ctk.CTkCanvas(
             master=canvas_frame,
             bg=AppColor.MAIN.value,
             height=800,
-            width=1050,
+            width=1170,
             borderwidth=0,
             highlightthickness=0,
         )
 
         # PACK
         canvas_frame.pack(side="left", anchor="nw", padx=(40, 0), pady=(60, 30))
+        cross_btn.pack(anchor="n", pady=10, padx=10)
         canvas.pack(pady=10, padx=10)
 
         # endregion
@@ -64,7 +77,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             font=("Inter", 24, "bold"),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
         )
         self.spec_name_lbl = ctk.CTkLabel(
             info_frame,
@@ -75,7 +87,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             ),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
             wraplength=250,
             justify="left",
         )
@@ -85,7 +96,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             font=("Inter", 24, "bold"),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
         )
         self.current_date_lbl = ctk.CTkLabel(
             info_frame,
@@ -96,7 +106,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             ),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
             wraplength=250,
             justify="left",
         )
@@ -111,7 +120,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             ),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
             wraplength=300,
             justify="left",
         )
@@ -125,7 +133,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             ),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
             wraplength=250,
             justify="left",
         )
@@ -140,7 +147,6 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             ),
             text_color=AppColor.WHITE.value,
             width=100,
-            fg_color=AppColor.BLACK.value,
             wraplength=350,
             justify="left",
         )
@@ -154,7 +160,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             text="Так держать, Сергей! Ещё пара занятий и вы сможете стабильно выполнять все действия.",
             font=(
                 "Arial",
-                24,
+                20,
             ),
             corner_radius=20,
             text_color=AppColor.WHITE.value,
@@ -164,28 +170,34 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         )
 
         choose_exercise_frame = make_frame(
-            info_frame, color="red", width=200, height=200
-        )
-        arrow_left, arrow_right = get_btns_images()
-        left_btn = ctk.CTkButton(
-            choose_exercise_frame,
-            text="",
-            image=arrow_left,
-            width=120,
-            fg_color="transparent",
-            border_width=0,
-        ).grid(
-            sticky="w",
-            column=0,
+            info_frame, color="transparent", width=200, height=200
         )
 
-        right_btn = make_btn(
+        left_btn = ctk.CTkButton(
             choose_exercise_frame,
-            text="",
+            text=None,
+            image=arrow_left,
+            width=60,
+            fg_color="transparent",
+            border_width=0,
+        ).grid(sticky="w", column=0, row=0, padx=(0, 20))
+
+        self.exercise_lbl = ctk.CTkLabel(
+            choose_exercise_frame,
+            text="Отведение левой руки",
+            font=("Arial", 24, "bold"),
+            text_color=AppColor.WHITE.value,
+            wraplength=200,
+            justify="left",
+        ).grid(sticky="w", column=1, row=0)
+
+        right_btn = ctk.CTkButton(
+            choose_exercise_frame,
+            text=None,
             image=arrow_right,
-            width=20,
-            fg_color=AppColor.BLACK.value,
-        ).grid(sticky="ne", column=2)
+            width=60,
+            fg_color="transparent",
+        ).grid(sticky="e", column=2, row=0, padx=(20, 0))
         # endregion
 
         # region Pack|GRID
@@ -201,7 +213,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
 
         spec_comment_lbl.pack(anchor="nw", padx=(60, 0), pady=(40, 0))
 
-        comment_frame.pack(anchor="nw", padx=(60, 0), pady=(10, 0), ipady=10, ipadx=10)
+        comment_frame.pack(anchor="nw", padx=(60, 0), pady=(10, 0))
 
         self.spec_comment_lbl.pack(anchor="nw", pady=20)
 
@@ -210,6 +222,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         choose_exercise_frame.pack(anchor="nw", padx=(60, 0), pady=20)
 
         choose_exercise_frame.grid_columnconfigure(list(range(3)), weight=1)
+        choose_exercise_frame.grid_rowconfigure(list(range(1)), weight=1)
 
         # endregion
 
@@ -221,8 +234,8 @@ def get_btns_images():
     # Формируем путь к файлу изображения
     path = script_dir / "images"
 
-    arrow_left = ctk.CTkImage(Image.open(path / "arrow_left.png"), size=(90, 90))
-    # arrow_left = ImageTk.PhotoImage(Image.open(path / "arrow_left.png"))
-    arrow_right = ctk.CTkImage(Image.open(path / "arrow_right.png"), size=(90, 90))
+    arrow_left = ctk.CTkImage(Image.open(path / "arrow_left.png"), size=(60, 60))
+    arrow_right = ctk.CTkImage(Image.open(path / "arrow_right.png"), size=(60, 60))
+    cross = ctk.CTkImage(Image.open(path / "cross.png"), size=(20, 20))
 
-    return arrow_left, arrow_right
+    return arrow_left, arrow_right, cross

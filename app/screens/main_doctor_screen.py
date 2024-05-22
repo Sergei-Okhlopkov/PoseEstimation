@@ -6,10 +6,10 @@ from PIL import Image
 from app.ctk_helper import make_frame, make_btn
 from enums import AppColor, AppScreen
 
-BTN_SIZE = 300
+FONT = "Inter"
 
 
-class MainPatientScreen(ctk.CTkFrame):
+class MainDoctorScreen(ctk.CTkFrame):
     def __init__(self, controller, parent, session):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
         self.session = session
@@ -27,29 +27,14 @@ class MainPatientScreen(ctk.CTkFrame):
             width=20,
             fg_color="transparent",
             command=lambda: controller.logout(),
-        )
+        ).pack(side="right", anchor="n", pady=10, padx=10)
 
-        btns_frame = make_frame(choose_area, "transparent")
-
-        exercises_btn = make_btn(
-            btns_frame,
-            "Упражнения",
-            BTN_SIZE,
-            BTN_SIZE,
-            command=lambda: controller.show_frame(AppScreen.EXERCISES.value),
-        )
-        statistics_btn = make_btn(
-            btns_frame,
-            "Статистика",
-            BTN_SIZE,
-            BTN_SIZE,
-            command=lambda: controller.show_frame(AppScreen.STATISTICS_PATIENT.value),
-        )
-
-        cross_btn.pack(anchor="ne", pady=10, padx=10)
-        btns_frame.place(relx=0.5, rely=0.5, anchor="center")
-        exercises_btn.pack(side="left", padx=[0, 60])
-        statistics_btn.pack(side="left")
+        header_lbl = ctk.CTkLabel(
+            choose_area,
+            text="Список пациентов",
+            font=(FONT, 42, "bold"),
+            text_color=AppColor.WHITE.value,
+        ).pack(side="top", padx=(70, 0), pady=(20, 0))
 
 
 def get_btn_image():
