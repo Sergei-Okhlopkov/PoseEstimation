@@ -5,6 +5,7 @@ from app.screens.exercises_screen import ExerciseScreen
 from app.screens.main_doctor_screen import MainDoctorScreen
 from app.screens.main_patient_screen import MainPatientScreen
 from app.screens.registration_screen import RegistrationScreen
+from app.screens.statistics_doctor_screen import StatisticsDoctorScreen
 from app.screens.statistics_patient_screen import StatisticsPatientScreen
 from enums import AppScreen
 
@@ -30,7 +31,7 @@ class ReabilitationApp(ctk.CTk):
         self.create_frames()
 
         # Отображение первого фрейма
-        self.show_frame(AppScreen.MAIN_DOCTOR.value)
+        self.show_frame(AppScreen.STATISTICS_DOCTOR.value)
 
     def create_frames(self):
 
@@ -53,6 +54,9 @@ class ReabilitationApp(ctk.CTk):
             self, self.main_frame, self.session
         )
         self.frames[AppScreen.STATISTICS_PATIENT.value] = statistics_patient
+
+        statistics_doctor = StatisticsDoctorScreen(self, self.main_frame, self.session)
+        self.frames[AppScreen.STATISTICS_DOCTOR.value] = statistics_doctor
 
     def show_frame(self, frame_name):
         # Скрываем все фреймы
