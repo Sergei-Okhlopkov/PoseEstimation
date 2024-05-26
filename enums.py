@@ -41,6 +41,7 @@ class AppColor(Enum):
     SUBMAIN = "#424C58"
     BUTTON = "#4B9BFB"
     BUTTON_HOVER = "#14375D"
+    LIST_HOVER = "#535362"
     BLACK = "#000000"
     GREEN = "#00E9A1"
     GREY = "#808080"

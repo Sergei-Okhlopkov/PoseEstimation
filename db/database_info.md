@@ -10,8 +10,8 @@ classDiagram
       Users <|-- Comment
       class Users{
           id: int
-          FK med_session_id: int
-          FK comment_id: int
+          FK med_session_id: int | null
+          FK comment_id: int | null
           first_name: str
           last_name: str
           patronymic: str | null

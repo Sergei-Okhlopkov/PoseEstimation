@@ -1,5 +1,8 @@
+from typing import List
+
 import customtkinter as ctk
 
+from db.schemas import SelectPatient
 from enums import AppColor
 
 FONT = "Inter"
@@ -74,6 +77,96 @@ def make_clickable_lbl(
     return ClickableLabel(
         root, text=text, click=click, font_size=font_size, text_color=text_color
     )
+
+
+class SelectScrollFrame(ctk.CTkScrollableFrame):
+    def __init__(self, master, controller, patients, selected_patient):
+        self.patients: List[SelectPatient] = patients
+        self.labels = []
+        self.controller = controller
+
+        super().__init__(
+            master,
+            height=300,
+            scrollbar_button_color=AppColor.BUTTON.value,
+            scrollbar_button_hover_color=AppColor.BUTTON_HOVER.value,
+            corner_radius=20,
+            border_color=AppColor.BLACK.value,
+            border_width=2,
+            fg_color=AppColor.SUBMAIN.value,
+        )
+
+        for patient in self.patients:
+            full_name = f"{patient.second_name} {patient.first_name}"
+            if patient.patronymic is not None:
+                full_name += f" {patient.patronymic}"
+
+            label = SelectableLabel(
+                self,
+                height=40,
+                text=full_name,
+                label_id=patient.id,
+                click=self.choose_label,
+            )
+            label.pack(anchor="w", fill="x", pady=5)
+            self.labels.append(label)
+
+    def choose_label(self, label_id):
+        # Выбираем пациента
+        self.controller.selected_patient = label_id
+
+        # Красим выбранного, остальные приводим к дефолтному цвету
+        for label in self.labels:
+            if label.label_id == label_id:
+                label.selected = True
+                label.configure(fg_color=AppColor.MAIN.value)
+            else:
+                label.selected = False
+                label.configure(fg_color=AppColor.SUBMAIN.value)
+
+
+class SelectableLabel(ctk.CTkLabel):
+    def __init__(
+        self,
+        master,
+        height,
+        text,
+        label_id,
+        font_size=30,
+        text_color=AppColor.WHITE.value,
+        click=None,
+    ):
+        super().__init__(
+            master,
+            height=height,
+            text=text,
+            font=(FONT, font_size),
+            text_color=text_color,
+            justify="left",
+            anchor="w",
+            padx=20,
+            corner_radius=20,
+        )
+        self.selected = False
+        self.label_id = label_id
+        self.click = click
+
+        self.bind("<Enter>", lambda e: self.on_enter())
+        self.bind("<Leave>", lambda e: self.on_leave())
+
+        self.bind("<Button-1>", lambda e: self.on_select())
+
+    def on_select(self):
+        self.selected = True
+        self.click(self.label_id)
+
+    def on_enter(self):
+        if not self.selected:
+            self.configure(fg_color=AppColor.LIST_HOVER.value)
+
+    def on_leave(self):
+        if not self.selected:
+            self.configure(fg_color=AppColor.SUBMAIN.value)
 
 
 class ClickableLabel(ctk.CTkLabel):
