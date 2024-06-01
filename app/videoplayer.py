@@ -3,7 +3,12 @@ import time
 import customtkinter
 from PIL import Image, ImageTk
 
-from recognition.calculations import get_shoulders_angles, get_elbows_angles
+from recognition.calculations import (
+    get_shoulders_angles,
+    get_elbows_angles,
+    get_hips_angles,
+    get_knees_angles,
+)
 from recognition.joint_data import highlited_joints
 from recognition.pose_recognition import recognize_pose, mpPose
 from recognition.render import draw_pose
@@ -14,35 +19,13 @@ OUTPUT_TIME = 0.1
 
 
 class VideoPlayer:
-    def __init__(self, app, canvas, video_tool_stripe, callbacks):
+    def __init__(self, app, canvas, callbacks):
         self.app = app
         self.canvas = canvas
-        self.video_tool_stripe = video_tool_stripe
 
         # Callback функции для отображения в интерфейсе
         self.callbacks = callbacks
 
-        # TODO: вынести кнопки в класс APP
-        # Создаем кнопку Play/Pause
-        self.play_button = customtkinter.CTkButton(
-            self.video_tool_stripe,
-            text="Pause",
-            command=self.play_pause,
-            bg_color="#424C58",
-        )
-
-        # Создаем кнопку вкл/выкл отрисовки позы
-        self.pose_button = customtkinter.CTkButton(
-            self.video_tool_stripe,
-            text="Turn off rendering",
-            command=self.draw_pose_switch,
-            bg_color="#424C58",
-        )
-
-        self.play_button.pack(side="left", padx=[20, 50])
-        self.pose_button.pack(side="left", padx=[20, 50])
-
-        # TODO: открывать поток только при переключении на фрейм с захватом
         # Открываем видеопоток
         self.capture = cv2.VideoCapture(0)
 
@@ -53,31 +36,31 @@ class VideoPlayer:
 
         self.elbows_angles = [0, 0]
         self.shoulders_angles = [0, 0]
+        self.hips_angles = [0, 0]
+        self.knees_angles = [0, 0]
+
         self.prev_shoulder_angles = self.shoulders_angles
         self.prev_elbows_angles = self.elbows_angles
+        self.prev_hips_angles = self.hips_angles
+        self.prev_knees_angles = self.knees_angles
+
         self.shoulders_speed = [0, 0]
         self.elbows_speed = [0, 0]
-        self.collected_speed = [0, 0, 0, 0]  # Для левой руки, затем для правой
+        self.hips_speed = [0, 0]
+        self.knees_speed = [0, 0]
+
+        # Для левой руки, затем для правой, поочерёдно
+        self.collected_speed = [0, 0, 0, 0]
         self.start_time = time.time()
 
         # Запускаем метод для обновления видео каждые 30 миллисекунд
         self.update_video()
 
-    def play_pause(self):
-        if self.is_playing:
-            self.is_playing = False
-            self.play_button.configure(text="Play")
-        else:
-            self.is_playing = True
-            self.play_button.configure(text="Pause")
-
     def draw_pose_switch(self):
         if self.draw_pose:
             self.draw_pose = False
-            self.pose_button.configure(text="Turn on rendering")
         else:
             self.draw_pose = True
-            self.pose_button.configure(text="Turn off rendering")
 
     def update_video(self):
         if self.is_playing:
@@ -90,7 +73,9 @@ class VideoPlayer:
                 pose = recognize_pose(frame)
 
                 self.shoulders_angles = get_shoulders_angles(pose.pose_landmarks)
-                self.elbows_angles = get_elbows_angles(pose.pose_landmarks)
+                self.elbows_angles = get_elbows_angles(pose.pose_landmarks, revert=True)
+                self.hips_angles = get_hips_angles(pose.pose_landmarks, revert=True)
+                self.knees_angles = get_knees_angles(pose.pose_landmarks, revert=True)
 
                 if pose.pose_landmarks and self.draw_pose:
                     # Отрисовка позы
@@ -142,7 +127,8 @@ class VideoPlayer:
                     self.callbacks,
                     self.shoulders_angles,
                     self.elbows_angles,
-                    self.shoulders_speed,
+                    self.hips_angles,
+                    self.knees_angles,
                 )
 
                 # Преобразуем кадр из BGR (OpenCV) в RGB (PIL)
@@ -176,10 +162,13 @@ class VideoPlayer:
 
     @staticmethod
     def update_interface_info(
-        callbacks, shoulders_angles, elbows_angles, shoulders_speed
+        callbacks,
+        shoulders_angles,
+        elbows_angles,
+        hips_angles,
+        knees_angles,
     ):
-        update_elbows_angle = callbacks["update_elbows_angle"]
-        update_shoulders_angle = callbacks["update_shoulders_angle"]
-
-        update_shoulders_angle(shoulders_angles)
-        update_elbows_angle(elbows_angles)
+        callbacks["update_elbows_angle"](shoulders_angles)
+        callbacks["update_shoulders_angle"](elbows_angles)
+        callbacks["update_hips_angle"](hips_angles)
+        callbacks["update_knees_angle"](knees_angles)

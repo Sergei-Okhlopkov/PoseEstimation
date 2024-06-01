@@ -92,3 +92,16 @@ def draw_pose(img, landmarks, mp_pose, highlight_joints=None):
                 continue
 
             cv2.circle(img, (joint_x, joint_y), 4, Color.ORANGE.value, -1)
+
+
+def bgr_to_rbg(color):
+    return tuple(reversed(color))
+
+
+def rgb_to_hex(color):
+    hex_color = "#%02X%02X%02X" % color
+    return hex_color
+
+
+def bgr_to_hex(color):
+    return rgb_to_hex(bgr_to_rbg(color))

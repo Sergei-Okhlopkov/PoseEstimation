@@ -106,14 +106,14 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
         # endregion
 
         # region Labels
-        spec_lbl = ctk.CTkLabel(
+        patinet_lbl = ctk.CTkLabel(
             info_frame,
             text="Пациент:",
             font=("Inter", 32, "bold"),
             text_color=AppColor.WHITE.value,
             width=100,
         )
-        spec_lbl.pack(anchor="nw", padx=(PAD, 0))
+        patinet_lbl.pack(anchor="nw", padx=(PAD, 0))
 
         self.patient_name_lbl = ctk.CTkLabel(
             info_frame,

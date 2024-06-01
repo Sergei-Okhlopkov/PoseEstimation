@@ -30,7 +30,7 @@ def make_entry(root, placeholder, corner_radius=20, font_size=36, height=60):
     return Entry(root, placeholder, corner_radius, font_size, height=height)
 
 
-def make_rbtn(root, text, variable, value, font_size=28):
+def make_rbtn(root, text, variable, value, font_size=28, command=None):
     return ctk.CTkRadioButton(
         root,
         text=text,
@@ -38,6 +38,7 @@ def make_rbtn(root, text, variable, value, font_size=28):
         value=value,
         font=(FONT, font_size),
         fg_color=AppColor.WHITE.value,
+        command=command,
     )
 
 

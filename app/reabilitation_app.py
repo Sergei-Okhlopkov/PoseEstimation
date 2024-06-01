@@ -2,6 +2,7 @@ import customtkinter as ctk
 
 from app.screens.auth_screen import AuthScreen
 from app.screens.exercises_screen import ExerciseScreen
+from app.screens.exercises_screen_new import ExerciseScreenNew
 from app.screens.main_doctor_screen import MainDoctorScreen
 from app.screens.main_patient_screen import MainPatientScreen
 from app.screens.registration_screen import RegistrationScreen
@@ -31,7 +32,7 @@ class ReabilitationApp(ctk.CTk):
         self.create_frames()
 
         # Отображение первого фрейма
-        self.show_frame(AppScreen.STATISTICS_DOCTOR.value)
+        self.show_frame(AppScreen.REGISTRATION.value)
 
     def create_frames(self):
 
@@ -41,7 +42,7 @@ class ReabilitationApp(ctk.CTk):
         main_doctor = MainDoctorScreen(self, self.main_frame, self.session)
         self.frames[AppScreen.MAIN_DOCTOR.value] = main_doctor
 
-        exercises = ExerciseScreen(self, self.main_frame, self.session)
+        exercises = ExerciseScreenNew(self, self.main_frame, self.session)
         self.frames[AppScreen.EXERCISES.value] = exercises
 
         registration = RegistrationScreen(self, self.main_frame, self.session)

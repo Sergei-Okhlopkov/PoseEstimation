@@ -29,6 +29,7 @@ class ExerciseType(Enum):
     RIGHT_SHOULDER_BEND = 5  # сгибание правого плеча
     LEFT_SHOULDER_BEND = 6  # сгибание левого плеча
     KNEE_BEND = 7  # приседание
+    LEANING_FORWARD = 8  # наклон вперёд
 
 
 class UserType(Enum):
@@ -46,6 +47,7 @@ class AppColor(Enum):
     GREEN = "#00E9A1"
     GREY = "#808080"
     WHITE = "#FFFFFF"
+    RED = "#C60000"
 
 
 class AppScreen(Enum):
