@@ -9,9 +9,8 @@ FONT = "Inter"
 
 
 class StatisticsDoctorScreen(ctk.CTkFrame):
-    def __init__(self, controller, parent, session):
+    def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.session = session
         self.patient_name_lbl: str = None
         self.current_date_lbl: str = None
         self.dynamic_direction_lbl = None

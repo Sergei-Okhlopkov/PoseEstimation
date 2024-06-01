@@ -10,9 +10,8 @@ TOOL_BTN_SIZE = 250
 
 
 class ExerciseScreenNew(ctk.CTkFrame):
-    def __init__(self, controller, parent, session):
+    def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.session = session
 
         knee_img, right_shoulder_img, left_shoulder_img, leaning_forward_img = (
             get_btns_images()

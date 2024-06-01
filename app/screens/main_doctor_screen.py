@@ -12,9 +12,8 @@ FONT = "Inter"
 
 
 class MainDoctorScreen(ctk.CTkFrame):
-    def __init__(self, controller, parent, session):
+    def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.session = session
         self.patients: List[SelectPatient] = []
         self.labels = []
 

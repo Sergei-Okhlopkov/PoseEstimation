@@ -15,9 +15,8 @@ ctk.set_appearance_mode("dark")
 
 
 class ReabilitationApp(ctk.CTk):
-    def __init__(self, session):
+    def __init__(self):
         super().__init__()
-        self.session = session
         self.title("Нейро-реабилитация")
         self.geometry("400x300")
         self.after(0, lambda: self.state("zoomed"))  # На весь экран
@@ -32,31 +31,29 @@ class ReabilitationApp(ctk.CTk):
         self.create_frames()
 
         # Отображение первого фрейма
-        self.show_frame(AppScreen.REGISTRATION.value)
+        self.show_frame(AppScreen.AUTH.value)
 
     def create_frames(self):
 
-        main_patient = MainPatientScreen(self, self.main_frame, self.session)
+        main_patient = MainPatientScreen(self, self.main_frame)
         self.frames[AppScreen.MAIN_PATIENT.value] = main_patient
 
-        main_doctor = MainDoctorScreen(self, self.main_frame, self.session)
+        main_doctor = MainDoctorScreen(self, self.main_frame)
         self.frames[AppScreen.MAIN_DOCTOR.value] = main_doctor
 
-        exercises = ExerciseScreenNew(self, self.main_frame, self.session)
+        exercises = ExerciseScreenNew(self, self.main_frame)
         self.frames[AppScreen.EXERCISES.value] = exercises
 
-        registration = RegistrationScreen(self, self.main_frame, self.session)
+        registration = RegistrationScreen(self, self.main_frame)
         self.frames[AppScreen.REGISTRATION.value] = registration
 
-        auth = AuthScreen(self, self.main_frame, self.session)
+        auth = AuthScreen(self, self.main_frame)
         self.frames[AppScreen.AUTH.value] = auth
 
-        statistics_patient = StatisticsPatientScreen(
-            self, self.main_frame, self.session
-        )
+        statistics_patient = StatisticsPatientScreen(self, self.main_frame)
         self.frames[AppScreen.STATISTICS_PATIENT.value] = statistics_patient
 
-        statistics_doctor = StatisticsDoctorScreen(self, self.main_frame, self.session)
+        statistics_doctor = StatisticsDoctorScreen(self, self.main_frame)
         self.frames[AppScreen.STATISTICS_DOCTOR.value] = statistics_doctor
 
     def show_frame(self, frame_name):

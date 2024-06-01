@@ -6,9 +6,8 @@ from PIL import Image
 
 
 class StatisticsPatientScreen(ctk.CTkFrame):
-    def __init__(self, controller, parent, session):
+    def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.session = session
         self.spec_name_lbl = None
         self.current_date_lbl = None
         self.dynamic_direction_lbl = None

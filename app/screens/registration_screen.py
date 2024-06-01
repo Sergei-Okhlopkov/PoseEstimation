@@ -9,15 +9,32 @@ from app.ctk_helper import (
     make_clickable_lbl,
     FONT,
 )
-from db.crud import create_user
+from db.crud import create_user, get_doctors
+from db.database import get_session
 from db.models import User
 from enums import AppColor, UserType, AppScreen
 
 
+def get_doctors_list():
+    with get_session() as session:
+        doctors = get_doctors(session)
+    doctors_list = []
+    for doctor in doctors:
+        item = f"{doctor.id} {doctor.last_name} {doctor.first_name} "
+        if doctor.patronymic:
+            item += f"{doctor.patronymic}"
+        doctors_list.append(item)
+
+    return doctors_list
+
+
+def get_doctor_id(doctor_str) -> int:
+    return int(doctor_str.split()[0])
+
+
 class RegistrationScreen(ctk.CTkFrame):
-    def __init__(self, controller, parent, session):
+    def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.session = session
         self.auth_password_entry = None
         self.auth_login_entry = None
 
@@ -28,14 +45,6 @@ class RegistrationScreen(ctk.CTkFrame):
         self.name_entry = None
         self.email_entry = None
         self.user_type = IntVar()
-        self.doctor_combo = True
-        doctors = [
-            "Здоровьев",
-            "Неболеев",
-            "Физиков",
-            "Машустов",
-            "Кедров",
-        ]  # предзагрузка всех зарегистрированных врачей перед появлением фрейма
 
         # region Frames
         reg_area = make_frame(self, AppColor.SUBMAIN.value, 20, 750, 750)
@@ -48,7 +57,7 @@ class RegistrationScreen(ctk.CTkFrame):
         self.email_entry = make_entry(reg_area, "Email")
         self.doctor_list = ctk.CTkComboBox(
             reg_area,
-            values=doctors,
+            values=get_doctors_list(),
             corner_radius=20,
             height=60,
             button_color=AppColor.BUTTON.value,
@@ -67,14 +76,14 @@ class RegistrationScreen(ctk.CTkFrame):
             "пациент",
             self.user_type,
             UserType.Patient.value,
-            command=self.switch_combo_doctors,
+            command=self.on_combo_doctors,
         )
         doctor_rbtn = make_rbtn(
             reg_area,
             "врач",
             self.user_type,
             UserType.Doctor.value,
-            command=self.switch_combo_doctors,
+            command=self.off_combo_doctors,
         )
 
         reg_btn = make_btn(reg_area, "Регистрация", command=self.reg)
@@ -173,18 +182,21 @@ class RegistrationScreen(ctk.CTkFrame):
             email=self.email_entry.get(),
             user_type=self.user_type.get(),
         )
-        create_user(self.session(), user)
 
-    def switch_combo_doctors(self):
-        if self.doctor_combo:
-            self.doctor_list.grid_forget()
-            self.doctor_combo = False
-        else:
-            self.doctor_list.grid(
-                row=6,
-                column=1,
-                columnspan=5,
-                padx=40,
-                sticky="ew",
-            )
-            self.doctor_combo = True
+        if user.user_type == UserType.Patient.value:
+            user.doctor_id = get_doctor_id(self.doctor_list.get())
+
+        with get_session() as session:
+            create_user(session, user)
+
+    def off_combo_doctors(self):
+        self.doctor_list.grid_forget()
+
+    def on_combo_doctors(self):
+        self.doctor_list.grid(
+            row=6,
+            column=1,
+            columnspan=5,
+            padx=40,
+            sticky="ew",
+        )
