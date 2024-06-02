@@ -99,7 +99,7 @@ class SelectScrollFrame(ctk.CTkScrollableFrame):
 
         if self.patients:
             for patient in self.patients:
-                full_name = f"{patient.second_name} {patient.first_name}"
+                full_name = f"{patient.last_name} {patient.first_name}"
                 if patient.patronymic is not None:
                     full_name += f" {patient.patronymic}"
 

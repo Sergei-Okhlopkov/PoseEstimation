@@ -32,43 +32,28 @@ class ReabilitationApp(ctk.CTk):
         self.main_frame.pack(fill="both", expand=True)
 
         # Создание дочерних фреймов
-        self.frames = {}
-        self.frames_to_update = {}  # фреймы, состояние которых необходимо обновлять
-        self.create_frames()
+        # self.create_frames()
+        self.cur_screen = None
+        self.frames = {
+            AppScreen.REGISTRATION.value: RegistrationScreen,
+            AppScreen.AUTH.value: AuthScreen,
+            AppScreen.EXERCISES.value: ExerciseScreen,
+            AppScreen.MAIN_PATIENT.value: MainPatientScreen,
+            AppScreen.MAIN_DOCTOR.value: MainDoctorScreen,
+            AppScreen.STATISTICS_PATIENT.value: StatisticsPatientScreen,
+            AppScreen.STATISTICS_DOCTOR.value: StatisticsDoctorScreen,
+        }
 
         # Отображение первого фрейма
         self.show_frame(AppScreen.AUTH.value)
 
-    def create_frames(self):
-
-        main_patient = MainPatientScreen(self, self.main_frame)
-        self.frames[AppScreen.MAIN_PATIENT.value] = main_patient
-
-        main_doctor = MainDoctorScreen(self, self.main_frame)
-        self.frames[AppScreen.MAIN_DOCTOR.value] = main_doctor
-
-        exercises = ExerciseScreenNew(self, self.main_frame)
-        self.frames[AppScreen.EXERCISES.value] = exercises
-
-        registration = RegistrationScreen(self, self.main_frame)
-        self.frames[AppScreen.REGISTRATION.value] = registration
-
-        auth = AuthScreen(self, self.main_frame)
-        self.frames[AppScreen.AUTH.value] = auth
-
-        statistics_patient = StatisticsPatientScreen(self, self.main_frame)
-        self.frames[AppScreen.STATISTICS_PATIENT.value] = statistics_patient
-
-        statistics_doctor = StatisticsDoctorScreen(self, self.main_frame)
-        self.frames[AppScreen.STATISTICS_DOCTOR.value] = statistics_doctor
-
     def show_frame(self, frame_name):
-        # Скрываем все фреймы
-        for frame in self.frames.values():
-            frame.pack_forget()
-
-        # Отображаем нужный фрейм
-        self.frames[frame_name].pack(fill="both", expand=True)
+        frame_class = self.frames[frame_name]
+        if self.cur_screen is None or not isinstance(self.main_frame, frame_class):
+            if self.cur_screen:
+                self.cur_screen.pack_forget()
+            self.cur_screen = frame_class(self, self.main_frame)
+            self.cur_screen.pack(fill="both", expand=True)
 
     def get_current_user(self):
         return self.user
