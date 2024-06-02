@@ -33,7 +33,7 @@ class MedSession(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     started_at: Mapped[datetime.datetime]
     finished_at: Mapped[datetime.datetime | None] = mapped_column(nullable=True)
-    exercise_type: Mapped[ExerciseType]
+    exercise_type: Mapped[int]
     max_angle: Mapped[int | None] = mapped_column(nullable=True)
     avg_speed: Mapped[int | None] = mapped_column(nullable=True)
 

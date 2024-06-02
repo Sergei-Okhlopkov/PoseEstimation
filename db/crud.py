@@ -23,6 +23,13 @@ def get_doctors(session: Session) -> List[Doctor]:
     return result.scalars().all()
 
 
+def get_user_by_id(session: Session, id: int) -> User:
+    stmt = select(User).where(User.id == id)
+    result = session.execute(stmt)
+
+    return result.scalars().one_or_none()
+
+
 def get_user_by_login(session: Session, login: str) -> User:
     stmt = select(User).where(User.login == login)
     result = session.execute(stmt)

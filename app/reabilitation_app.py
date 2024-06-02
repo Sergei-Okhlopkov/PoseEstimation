@@ -4,7 +4,6 @@ import customtkinter as ctk
 
 from app.screens.auth_screen import AuthScreen
 from app.screens.exercises_screen import ExerciseScreen
-from app.screens.exercises_screen_new import ExerciseScreenNew
 from app.screens.main_doctor_screen import MainDoctorScreen
 from app.screens.main_patient_screen import MainPatientScreen
 from app.screens.registration_screen import RegistrationScreen
@@ -26,6 +25,7 @@ class ReabilitationApp(ctk.CTk):
 
         # Данные о пользователе
         self.user: Optional[User] = None
+        self.choosed_exercise: int = None
 
         # Основной фрейм
         self.main_frame = ctk.CTkFrame(self)
@@ -54,9 +54,6 @@ class ReabilitationApp(ctk.CTk):
                 self.cur_screen.pack_forget()
             self.cur_screen = frame_class(self, self.main_frame)
             self.cur_screen.pack(fill="both", expand=True)
-
-    def get_current_user(self):
-        return self.user
 
     def logout(self):
         self.show_frame(AppScreen.AUTH.value)

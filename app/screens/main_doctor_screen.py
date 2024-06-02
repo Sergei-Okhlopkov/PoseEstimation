@@ -19,26 +19,7 @@ class MainDoctorScreen(ctk.CTkFrame):
         self.controller = controller
         self.patients: List[SelectPatient] = self.get_patients()
         self.labels = []
-
-        # # region Тестовые данные для выбора пацинета из списка
-        # f_p = SelectPatient(
-        #     id=1,
-        #     first_name="Сергей",
-        #     second_name="Охлопков",
-        #     patronymic="Михайлович",
-        # )
-        #
-        # s_p = SelectPatient(
-        #     id=2,
-        #     first_name="Олег",
-        #     second_name="Тинькофф",
-        #     patronymic="Юрьевич",
-        # )
-        #
-        # self.patients.append(f_p)
-        # self.patients.append(s_p)
-        # endregion
-        # self.selected_patient = self.patients[0]
+        self.selected_patient: int
 
         cross = self.get_btn_image()
 
@@ -82,7 +63,6 @@ class MainDoctorScreen(ctk.CTkFrame):
         if self.controller.user:
             doctor_id = self.controller.user.id
             with get_session() as session:
-
                 return get_patients_by_doctor_id(session, doctor_id)
 
     @staticmethod
