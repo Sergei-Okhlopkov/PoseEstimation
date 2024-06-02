@@ -11,8 +11,11 @@ from app.ctk_helper import (
 )
 from db.crud import create_user, get_doctors
 from db.database import get_session
+from db.hash_password import get_hash
 from db.models import User
 from enums import AppColor, UserType, AppScreen
+
+PATRONYMIC_PLACEHOLDER = "Отчество (необязательно)"
 
 
 def get_doctors_list():
@@ -35,8 +38,7 @@ def get_doctor_id(doctor_str) -> int:
 class RegistrationScreen(ctk.CTkFrame):
     def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.auth_password_entry = None
-        self.auth_login_entry = None
+        self.controller = controller
 
         self.password_entry = None
         self.login_entry = None
@@ -45,19 +47,20 @@ class RegistrationScreen(ctk.CTkFrame):
         self.name_entry = None
         self.email_entry = None
         self.user_type = IntVar()
+        self.doctors = get_doctors_list()
 
         # region Frames
         reg_area = make_frame(self, AppColor.SUBMAIN.value, 20, 750, 750)
         # region reg_area elements
         self.surname_entry = make_entry(reg_area, "Фамилия")
         self.name_entry = make_entry(reg_area, "Имя")
-        self.patronymic_entry = make_entry(reg_area, "Отчество (необязательно)")
+        self.patronymic_entry = make_entry(reg_area, PATRONYMIC_PLACEHOLDER)
         self.login_entry = make_entry(reg_area, "Логин")
         self.password_entry = make_entry(reg_area, "Пароль")
         self.email_entry = make_entry(reg_area, "Email")
         self.doctor_list = ctk.CTkComboBox(
             reg_area,
-            values=get_doctors_list(),
+            values=self.doctors,
             corner_radius=20,
             height=60,
             button_color=AppColor.BUTTON.value,
@@ -172,13 +175,16 @@ class RegistrationScreen(ctk.CTkFrame):
         # endregion
 
     def reg(self):
+        patronymic = None
+        if self.patronymic_entry.get() != PATRONYMIC_PLACEHOLDER:
+            patronymic = self.patronymic_entry.get()
 
         user = User(
             first_name=self.name_entry.get(),
             last_name=self.surname_entry.get(),
-            patronymic=self.patronymic_entry.get(),
+            patronymic=patronymic,
             login=self.login_entry.get(),
-            password=self.password_entry.get(),
+            password=get_hash(self.password_entry.get()),
             email=self.email_entry.get(),
             user_type=self.user_type.get(),
         )
@@ -188,6 +194,9 @@ class RegistrationScreen(ctk.CTkFrame):
 
         with get_session() as session:
             create_user(session, user)
+        # self.reload_doctor_list()
+        self.doctor_list.configure(values=get_doctors_list())
+        self.controller.show_frame(AppScreen.AUTH.value)
 
     def off_combo_doctors(self):
         self.doctor_list.grid_forget()

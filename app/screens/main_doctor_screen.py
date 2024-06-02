@@ -5,6 +5,8 @@ import customtkinter as ctk
 from PIL import Image
 
 from app.ctk_helper import make_frame, SelectableLabel, SelectScrollFrame
+from db.crud import get_patients_by_doctor_id
+from db.database import get_session
 from db.schemas import SelectPatient
 from enums import AppColor
 
@@ -14,28 +16,29 @@ FONT = "Inter"
 class MainDoctorScreen(ctk.CTkFrame):
     def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
-        self.patients: List[SelectPatient] = []
+        self.controller = controller
+        self.patients: List[SelectPatient] = self.get_patients()
         self.labels = []
 
-        # region Тестовые данные для выбора пацинета из списка
-        f_p = SelectPatient(
-            id=1,
-            first_name="Сергей",
-            second_name="Охлопков",
-            patronymic="Михайлович",
-        )
-
-        s_p = SelectPatient(
-            id=2,
-            first_name="Олег",
-            second_name="Тинькофф",
-            patronymic="Юрьевич",
-        )
-
-        self.patients.append(f_p)
-        self.patients.append(s_p)
+        # # region Тестовые данные для выбора пацинета из списка
+        # f_p = SelectPatient(
+        #     id=1,
+        #     first_name="Сергей",
+        #     second_name="Охлопков",
+        #     patronymic="Михайлович",
+        # )
+        #
+        # s_p = SelectPatient(
+        #     id=2,
+        #     first_name="Олег",
+        #     second_name="Тинькофф",
+        #     patronymic="Юрьевич",
+        # )
+        #
+        # self.patients.append(f_p)
+        # self.patients.append(s_p)
         # endregion
-        self.selected_patient = self.patients[0]
+        # self.selected_patient = self.patients[0]
 
         cross = self.get_btn_image()
 
@@ -60,7 +63,9 @@ class MainDoctorScreen(ctk.CTkFrame):
         ).pack(side="top", pady=(20, 0))
 
         scrollable_frame = SelectScrollFrame(
-            choose_area, self, self.patients, self.selected_patient
+            choose_area,
+            self,
+            self.patients,
         )
         scrollable_frame.pack(side="top", fill="x", padx=40, pady=(20, 0))
 
@@ -72,6 +77,13 @@ class MainDoctorScreen(ctk.CTkFrame):
             corner_radius=20,
             font=(FONT, 40, "bold"),
         ).pack(side="top", ipady=10, pady=(30, 0))
+
+    def get_patients(self):
+        if self.controller.user:
+            doctor_id = self.controller.user.id
+            with get_session() as session:
+
+                return get_patients_by_doctor_id(session, doctor_id)
 
     @staticmethod
     def get_btn_image():

@@ -2,12 +2,11 @@ from contextlib import contextmanager
 from typing import Annotated
 from sqlalchemy import create_engine, String
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from sqlalchemy.orm import DeclarativeBase, Session
 
 DATABASE_URL = "sqlite:///recognition_app.db"
 
 engine = create_engine(DATABASE_URL)
-# SessionLocal = sessionmaker(bind=engine)
 
 
 str_64 = Annotated[str, 64]

@@ -81,7 +81,7 @@ def make_clickable_lbl(
 
 
 class SelectScrollFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, controller, patients, selected_patient):
+    def __init__(self, master, controller, patients):
         self.patients: List[SelectPatient] = patients
         self.labels = []
         self.controller = controller
@@ -97,20 +97,21 @@ class SelectScrollFrame(ctk.CTkScrollableFrame):
             fg_color=AppColor.SUBMAIN.value,
         )
 
-        for patient in self.patients:
-            full_name = f"{patient.second_name} {patient.first_name}"
-            if patient.patronymic is not None:
-                full_name += f" {patient.patronymic}"
+        if self.patients:
+            for patient in self.patients:
+                full_name = f"{patient.second_name} {patient.first_name}"
+                if patient.patronymic is not None:
+                    full_name += f" {patient.patronymic}"
 
-            label = SelectableLabel(
-                self,
-                height=40,
-                text=full_name,
-                label_id=patient.id,
-                click=self.choose_label,
-            )
-            label.pack(anchor="w", fill="x", pady=5)
-            self.labels.append(label)
+                label = SelectableLabel(
+                    self,
+                    height=40,
+                    text=full_name,
+                    label_id=patient.id,
+                    click=self.choose_label,
+                )
+                label.pack(anchor="w", fill="x", pady=5)
+                self.labels.append(label)
 
     def choose_label(self, label_id):
         # Выбираем пациента

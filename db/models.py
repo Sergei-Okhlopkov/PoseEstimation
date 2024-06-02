@@ -17,7 +17,7 @@ class User(Base):
     last_name: Mapped[str_64]
     # отчество необязательное поле
     patronymic: Mapped[str_64 | None] = mapped_column(nullable=True)
-    login: Mapped[str_64]
+    login: Mapped[str_64] = mapped_column(unique=True)
     password: Mapped[str_64]
     email: Mapped[str_64]
     user_type: Mapped[int]

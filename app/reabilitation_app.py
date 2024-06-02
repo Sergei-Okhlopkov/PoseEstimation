@@ -1,3 +1,5 @@
+from typing import Optional
+
 import customtkinter as ctk
 
 from app.screens.auth_screen import AuthScreen
@@ -8,6 +10,7 @@ from app.screens.main_patient_screen import MainPatientScreen
 from app.screens.registration_screen import RegistrationScreen
 from app.screens.statistics_doctor_screen import StatisticsDoctorScreen
 from app.screens.statistics_patient_screen import StatisticsPatientScreen
+from db.models import User
 from enums import AppScreen
 
 ctk.set_default_color_theme("dark-blue")
@@ -20,6 +23,9 @@ class ReabilitationApp(ctk.CTk):
         self.title("Нейро-реабилитация")
         self.geometry("400x300")
         self.after(0, lambda: self.state("zoomed"))  # На весь экран
+
+        # Данные о пользователе
+        self.user: Optional[User] = None
 
         # Основной фрейм
         self.main_frame = ctk.CTkFrame(self)
@@ -63,6 +69,9 @@ class ReabilitationApp(ctk.CTk):
 
         # Отображаем нужный фрейм
         self.frames[frame_name].pack(fill="both", expand=True)
+
+    def get_current_user(self):
+        return self.user
 
     def logout(self):
         self.show_frame(AppScreen.AUTH.value)
