@@ -24,12 +24,12 @@ class Color(Enum):
 class ExerciseType(Enum):
     RIGHT_SHOULDER_ABDUCTION = 1  # отведение правого плеча
     LEFT_SHOULDER_ABDUCTION = 2  # отведение левого плеча
-    RIGHT_ELBOW_BEND = 3
-    LEFT_ELBOW_BEND = 4
-    RIGHT_SHOULDER_BEND = 5  # сгибание правого плеча
-    LEFT_SHOULDER_BEND = 6  # сгибание левого плеча
-    KNEE_BEND = 7  # приседание
-    LEANING_FORWARD = 8  # наклон вперёд
+    # RIGHT_ELBOW_BEND = 3
+    # LEFT_ELBOW_BEND = 4
+    # RIGHT_SHOULDER_BEND = 5  # сгибание правого плеча
+    # LEFT_SHOULDER_BEND = 6  # сгибание левого плеча
+    KNEE_BEND = 3  # приседание
+    LEANING_FORWARD = 4  # наклон вперёд
 
 
 class UserType(Enum):

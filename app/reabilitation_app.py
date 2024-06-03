@@ -25,7 +25,7 @@ class ReabilitationApp(ctk.CTk):
 
         # Данные о пользователе
         self.user: Optional[User] = None
-        self.choosed_exercise: int = None
+        self.selected_exercise: int = None
 
         # Основной фрейм
         self.main_frame = ctk.CTkFrame(self)

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -13,3 +15,9 @@ class Doctor(BaseModel):
     first_name: str
     second_name: str
     patronymic: str
+
+
+class MedSessionUpdate(BaseModel):
+    finished_at: datetime
+    max_angle: int
+    avg_speed: int

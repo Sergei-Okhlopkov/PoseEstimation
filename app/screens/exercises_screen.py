@@ -3,7 +3,7 @@ from PIL import Image
 import customtkinter as ctk
 
 from app.videoplayer import VideoPlayer
-from enums import AppColor, Color
+from enums import AppColor, Color, ExerciseType
 from recognition.render import bgr_to_hex
 
 TOOL_BTN_SIZE = 250
@@ -12,6 +12,7 @@ TOOL_BTN_SIZE = 250
 class ExerciseScreen(ctk.CTkFrame):
     def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
+        self.controller = controller
 
         knee_img, right_shoulder_img, left_shoulder_img, leaning_forward_img = (
             get_btns_images()
@@ -196,7 +197,7 @@ class ExerciseScreen(ctk.CTkFrame):
             "update_knees_angle": self.update_knees_angle,
         }
 
-        videoplayer = VideoPlayer(
+        self.videoplayer = VideoPlayer(
             controller,
             canvas,
             callbacks,
@@ -222,6 +223,7 @@ class ExerciseScreen(ctk.CTkFrame):
             height=40,
             width=TOOL_BTN_SIZE,
             corner_radius=15,
+            command=self.videoplayer.start_med_session,
         )
         start_btn.grid(
             row=0,
@@ -237,6 +239,7 @@ class ExerciseScreen(ctk.CTkFrame):
             height=40,
             width=TOOL_BTN_SIZE,
             corner_radius=15,
+            command=self.videoplayer.stop_med_session,
         )
         stop_btn.grid(
             row=0,
@@ -253,7 +256,7 @@ class ExerciseScreen(ctk.CTkFrame):
             height=40,
             width=TOOL_BTN_SIZE,
             corner_radius=15,
-            command=videoplayer.draw_pose_switch,
+            command=self.videoplayer.draw_pose_switch,
         )
         switch_pose_btn.grid(
             row=0,
@@ -275,6 +278,9 @@ class ExerciseScreen(ctk.CTkFrame):
             image=left_shoulder_img,
             width=150,
             fg_color="transparent",
+            command=lambda: self.set_exercise(
+                ExerciseType.LEFT_SHOULDER_ABDUCTION.value
+            ),
         ).pack(side="left", padx=(60, 0))
 
         right_hand_exercise_btn = ctk.CTkButton(
@@ -283,6 +289,9 @@ class ExerciseScreen(ctk.CTkFrame):
             image=right_shoulder_img,
             width=150,
             fg_color="transparent",
+            command=lambda: self.set_exercise(
+                ExerciseType.RIGHT_SHOULDER_ABDUCTION.value
+            ),
         ).pack(side="left", padx=(60, 0))
 
         knee_bend_exercise_btn = ctk.CTkButton(
@@ -291,6 +300,7 @@ class ExerciseScreen(ctk.CTkFrame):
             image=knee_img,
             width=150,
             fg_color="transparent",
+            command=lambda: self.set_exercise(ExerciseType.KNEE_BEND.value),
         ).pack(side="left", padx=(60, 0))
 
         leaning_forward_exercise_btn = ctk.CTkButton(
@@ -299,6 +309,7 @@ class ExerciseScreen(ctk.CTkFrame):
             image=leaning_forward_img,
             width=150,
             fg_color="transparent",
+            command=lambda: self.set_exercise(ExerciseType.LEANING_FORWARD.value),
         ).pack(side="left", padx=(60, 0))
 
     def update_shoulders_angle(self, values):
@@ -316,6 +327,10 @@ class ExerciseScreen(ctk.CTkFrame):
     def update_knees_angle(self, values):
         self.l_knee_angle.configure(text=f"{values[0]}")
         self.r_knee_angle.configure(text=f"{values[1]}")
+
+    def set_exercise(self, exercise_type: int):
+        if not self.videoplayer.recording_session:
+            self.controller.selected_exercise = exercise_type
 
 
 def get_btns_images():
