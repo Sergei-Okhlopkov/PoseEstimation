@@ -41,8 +41,9 @@ class MedSession(Base):
 class Comment(Base):
     __tablename__ = "comments"
     id: Mapped[int_pk]
-    med_session_id: Mapped[int] = mapped_column(ForeignKey("med_sessions.id"))
     text: Mapped[str]
     date: Mapped[datetime.datetime] = mapped_column(
         server_default=func.now(), onupdate=datetime.datetime.utcnow()
     )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    exercise_type: Mapped[int]
