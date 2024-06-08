@@ -24,7 +24,7 @@ class ReabilitationApp(ctk.CTk):
         self.after(0, lambda: self.state("zoomed"))  # На весь экран
 
         # Данные о пользователе
-        self.user: Optional[User] = None
+        self.user: User = None
         self.selected_exercise: int = None
 
         # Основной фрейм

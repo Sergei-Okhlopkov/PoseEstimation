@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, and_
 from sqlalchemy.orm import Session
 
 from db.database import get_session
@@ -67,6 +67,25 @@ def get_patients_by_doctor_id(session: Session, doctor_id: int):
     stmt = select(User).where(User.doctor_id == doctor_id)
     result = session.execute(stmt)
 
+    return result.scalars().all()
+
+
+def get_user_med_sessions_by_exercise_type(
+    session: Session, user_id: int, exercise_type: int, limit: int = 10
+) -> List[MedSession]:
+    stmt = (
+        select(MedSession)
+        .where(
+            and_(
+                MedSession.user_id == user_id,
+                MedSession.exercise_type == exercise_type,
+            )
+        )
+        .order_by(MedSession.finished_at)
+        .limit(limit)
+    )
+
+    result = session.execute(stmt)
     return result.scalars().all()
 
 

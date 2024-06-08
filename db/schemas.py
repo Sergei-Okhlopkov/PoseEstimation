@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel
 
@@ -21,3 +22,9 @@ class MedSessionUpdate(BaseModel):
     finished_at: datetime
     max_angle: int
     avg_speed: int
+
+
+class GraphData(BaseModel):
+    angle: List[int]
+    speed: List[int]
+    date: List[datetime]
