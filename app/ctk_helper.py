@@ -26,8 +26,18 @@ def make_frame(
 
 
 # TODO: вынести дефолтные настройки в файл настроек (цвет подсказки, радиус закругления, размер шрифта)
-def make_entry(root, placeholder, corner_radius=20, font_size=36, height=60):
-    return Entry(root, placeholder, corner_radius, font_size, height=height)
+def make_entry(root, placeholder, corner_radius=20, font_size=36, height=60, show=None):
+    return ctk.CTkEntry(
+        root,
+        height=height,
+        placeholder_text=placeholder,
+        corner_radius=corner_radius,
+        fg_color=AppColor.WHITE.value,
+        font=(FONT, font_size),
+        text_color=AppColor.BLACK.value,
+        placeholder_text_color=AppColor.GREY.value,
+        show=show,
+    )
 
 
 def make_rbtn(root, text, variable, value, font_size=28, command=None):
@@ -200,45 +210,3 @@ class ClickableLabel(ctk.CTkLabel):
         self.configure(text_color=AppColor.WHITE.value)
         frame = self.click[1]
         self.click[0](frame)
-
-
-class Entry(ctk.CTkEntry):
-    def __init__(
-        self,
-        master,
-        placeholder="PLACEHOLDER",
-        corner_radius=20,
-        font_size=36,
-        placeholder_color="grey",
-        height=60,
-    ):
-        super().__init__(
-            master,
-            height=height,
-            corner_radius=corner_radius,
-            fg_color=AppColor.WHITE.value,
-            text_color=placeholder_color,
-            font=(FONT, font_size),
-        )
-
-        self.placeholder = placeholder
-        self.placeholder_color = placeholder_color
-
-        self.bind("<FocusIn>", self.foc_in)
-        self.bind("<FocusOut>", self.foc_out)
-
-        self.put_placeholder()
-
-    def put_placeholder(self):
-        self.insert(0, self.placeholder)
-        self._text_color = self.placeholder_color
-
-    def foc_in(self, *args):
-        if self._text_color == self.placeholder_color:
-            self.delete("0", "end")
-            self.configure(text_color=AppColor.BLACK.value)
-
-    def foc_out(self, *args):
-        if not self.get():
-            self.configure(text_color=self.placeholder_color)
-            self.put_placeholder()

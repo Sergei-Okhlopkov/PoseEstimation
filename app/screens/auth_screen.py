@@ -18,7 +18,7 @@ class AuthScreen(ctk.CTkFrame):
         auth_area = make_frame(self, AppColor.SUBMAIN.value, 20, 750, 450)
         # region auth_area elements
         self.login_entry = make_entry(auth_area, "Логин")
-        self.password_entry = make_entry(auth_area, "Пароль")
+        self.password_entry = make_entry(auth_area, "Пароль", show="*")
         auth_btn = make_btn(auth_area, "Вход", command=self.login)
         to_reg_btn = make_clickable_lbl(
             auth_area,
