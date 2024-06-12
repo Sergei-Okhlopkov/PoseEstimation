@@ -26,12 +26,13 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         self.last_date_lbl = None
         self.dynamic_direction_lbl = None
         self.exercise_lbl = None
-        self.selected_exercise = 0  # начинаем показ с первого упражнения
+        self.canvas: FigureCanvasTkAgg = None
+        self.fig, self.axes = plt.subplots()
 
         self.last_date: str = "—"
         self.doctor_name: str = "не указан"
         self.exercise_name: str = None
-        self.exercise_number: int = 0
+        self.selected_exercise: int = 0  # начинаем показ с первого упражнения
         self.exercise_data: List[List[MedSession]] = None
         self.exercise_data_test: List[Tuple[int, int, datetime]] = None
 
@@ -40,6 +41,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         # Изображения для кнопок
         arrow_left, arrow_right, cross = get_btns_images()
 
+        # region Вёрстка
         statistics_area = make_frame(
             self,
             AppColor.SUBMAIN.value,
@@ -78,6 +80,11 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             width=920,
             color=AppColor.MAIN.value,
             corner_radius=20,
+        )
+
+        self.canvas = FigureCanvasTkAgg(
+            self.fig,
+            master=self.canvas_frame,
         )
 
         # PACK
@@ -202,6 +209,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             width=60,
             fg_color="transparent",
             border_width=0,
+            command=self.prev_exercise,
         ).grid(sticky="w", column=0, row=0, padx=(0, 20))
 
         self.exercise_lbl = ctk.CTkLabel(
@@ -211,7 +219,9 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             text_color=AppColor.WHITE.value,
             wraplength=200,
             justify="left",
-        ).grid(sticky="w", column=1, row=0)
+        )
+
+        self.exercise_lbl.grid(sticky="w", column=1, row=0)
 
         right_btn = ctk.CTkButton(
             choose_exercise_frame,
@@ -219,6 +229,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             image=arrow_right,
             width=60,
             fg_color="transparent",
+            command=self.next_exercise,
         ).grid(sticky="e", column=2, row=0, padx=(20, 0))
         # endregion
 
@@ -247,6 +258,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         choose_exercise_frame.grid_rowconfigure(list(range(1)), weight=1)
         self.update_interface()
         # endregion
+        # endregion
 
     def load_data(self):
         with get_session() as session:
@@ -257,11 +269,12 @@ class StatisticsPatientScreen(ctk.CTkFrame):
             full_name += f" {doctor.patronymic}"
 
         self.doctor_name = full_name
-        self.exercise_name = exercise_types[self.exercise_number][0]
+        self.exercise_name = exercise_types[self.selected_exercise][0]
 
         # загрузка данных по упражнениям
         self.load_exercise_data()
 
+    # TODO: разобраться с азгружаемыми данными, что-то тут лишнее
     def load_exercise_data(self):
         exercises = []
         exercises_test = []
@@ -288,56 +301,81 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         self.exercise_data = exercises
 
     def update_interface(self):
-        # Установим дату последнего занятия
-        self.last_date_lbl.configure(
-            text=self.exercise_data[self.exercise_number][-1].finished_at.date()
-        )
+        fig = self.fig
+        ax = self.axes
 
-        # Определим динамику последних 5 занятий
-        dynamic = get_dynamic(self.exercise_data[self.exercise_number])
-        self.dynamic_direction_lbl.configure(text=dynamic)
+        if self.exercise_data[self.selected_exercise]:
+            # Установим дату последнего занятия
+            self.last_date_lbl.configure(
+                text=self.exercise_data[self.selected_exercise][-1].finished_at.date()
+            )
 
-        # TODO: при настройке кнопок - выставить забор  номер упражнения из переменной
-        graph_data = get_graph_data(self.exercise_data_test, 1)
-        # Вставляем данные для графика
-        fig, ax = plt.subplots()
+            # Установим название упражнения
+            self.exercise_lbl.configure(text=exercise_types[self.selected_exercise][0])
 
-        # Установка отступов
-        plt.subplots_adjust(
-            left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0
-        )
+            # Определим динамику последних 5 занятий
+            dynamic = get_dynamic(self.exercise_data[self.selected_exercise])
+            self.dynamic_direction_lbl.configure(text=dynamic)
 
-        # отображение графиков
-        ax.plot(graph_data.date, graph_data.angle, linewidth=3)
-        ax.plot(graph_data.date, graph_data.speed, linewidth=3)
+            graph_data = get_graph_data(self.exercise_data_test, self.selected_exercise)
 
-        # Добавляем легенду
-        ax.legend("Суперлегенда")
-        ax.xaxis.label.set_color(AppColor.WHITE.value)
-        ax.yaxis.label.set_color(AppColor.WHITE.value)
-        ax.tick_params(axis="x", colors=AppColor.WHITE.value)
-        ax.tick_params(axis="y", colors=AppColor.WHITE.value)
-        ax.set_facecolor(AppColor.MAIN.value)
+            # Установка отступов
+            plt.subplots_adjust(
+                left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0
+            )
 
-        ax.spines["bottom"].set_color(AppColor.WHITE.value)
-        ax.spines["top"].set_color(AppColor.WHITE.value)
-        ax.spines["left"].set_color(AppColor.WHITE.value)
-        ax.spines["right"].set_color(AppColor.WHITE.value)
+            # отображение графиков
+            ax.clear()
+            ax.plot(
+                graph_data.date,
+                graph_data.angle,
+                linewidth=3,
+                marker="o",
+                label="Максимальный угол отклонения",
+            )
+            ax.plot(
+                graph_data.date,
+                graph_data.speed,
+                linewidth=3,
+                marker="o",
+                label="Средняя скорость движения",
+            )
 
-        # Добавляем заголовок и подписи осей
-        ax.set_title("Два графика на одном полотне", color=AppColor.WHITE.value)
-        plt.title("Статистика по упражнению за последние 10 занятий")
-        plt.grid(True)
+            # Добавляем легенду
+            ax.legend(loc="upper left", fontsize=10, frameon=True)
+            ax.xaxis.label.set_color(AppColor.WHITE.value)
+            ax.yaxis.label.set_color(AppColor.WHITE.value)
+            ax.tick_params(axis="x", colors=AppColor.WHITE.value)
+            ax.tick_params(axis="y", colors=AppColor.WHITE.value)
+            ax.set_facecolor(AppColor.MAIN.value)
 
-        fig.set_facecolor(AppColor.MAIN.value)
+            ax.spines["bottom"].set_color(AppColor.WHITE.value)
+            ax.spines["top"].set_color(AppColor.WHITE.value)
+            ax.spines["left"].set_color(AppColor.WHITE.value)
+            ax.spines["right"].set_color(AppColor.WHITE.value)
 
-        self.canvas = FigureCanvasTkAgg(
-            fig,
-            master=self.canvas_frame,
-        )
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill="both", expand=True)
-        self.canvas.get_tk_widget().pack_configure(padx=10, pady=10)
+            # Добавляем заголовок и подписи осей
+            plt.title(
+                "Статистика по упражнению за последние 10 занятий",
+                color=AppColor.WHITE.value,
+            )
+            plt.grid(True)
+
+            fig.set_facecolor(AppColor.MAIN.value)
+
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(fill="both", expand=True)
+            self.canvas.get_tk_widget().pack_configure(padx=10, pady=10)
+
+    def next_exercise(self):
+        if self.selected_exercise < 3:
+            self.selected_exercise += 1
+            self.update_interface()
+
+    def prev_exercise(self):
+        if self.selected_exercise > 0:
+            self.selected_exercise -= 1
+            self.update_interface()
 
 
 def get_btns_images():
@@ -379,7 +417,7 @@ def get_dynamic(data) -> str:
 
 def get_graph_data(exercise_data, exercise_num) -> GraphData:
     graph_data = GraphData(angle=[], speed=[], date=[])
-    for session_info in exercise_data[exercise_num - 1]:
+    for session_info in exercise_data[exercise_num]:
         graph_data.angle.append(session_info[0])
         graph_data.speed.append(session_info[1])
         graph_data.date.append(session_info[2])
