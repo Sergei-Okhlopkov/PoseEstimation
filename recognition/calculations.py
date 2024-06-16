@@ -43,6 +43,10 @@ def get_shoulders_angles(landmarks):
         r_shoulder_angle = int(get_angle(right_shoulder))
         l_shoulder_angle = int(get_angle(left_shoulder))
 
+        if revert:
+            r_shoulder_angle = 180 - r_shoulder_angle
+            l_shoulder_angle = 180 - l_shoulder_angle
+
         return [r_shoulder_angle, l_shoulder_angle]
     else:
         return [-1, -1]
