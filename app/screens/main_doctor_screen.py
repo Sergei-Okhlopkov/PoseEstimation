@@ -5,10 +5,10 @@ import customtkinter as ctk
 from PIL import Image
 
 from app.ctk_helper import make_frame, SelectableLabel, SelectScrollFrame
-from db.crud import get_patients_by_doctor_id
+from db.crud import get_patients_by_doctor_id, get_user_by_id
 from db.database import get_session
 from db.schemas import SelectPatient
-from enums import AppColor
+from enums import AppColor, AppScreen
 
 FONT = "Inter"
 
@@ -45,7 +45,7 @@ class MainDoctorScreen(ctk.CTkFrame):
 
         scrollable_frame = SelectScrollFrame(
             choose_area,
-            self,
+            self.controller,
             self.patients,
         )
         scrollable_frame.pack(side="top", fill="x", padx=40, pady=(20, 0))
@@ -57,6 +57,7 @@ class MainDoctorScreen(ctk.CTkFrame):
             text_color=AppColor.WHITE.value,
             corner_radius=20,
             font=(FONT, 40, "bold"),
+            command=self.check_patient,
         ).pack(side="top", ipady=10, pady=(30, 0))
 
     def get_patients(self):
@@ -64,6 +65,13 @@ class MainDoctorScreen(ctk.CTkFrame):
             doctor_id = self.controller.user.id
             with get_session() as session:
                 return get_patients_by_doctor_id(session, doctor_id)
+
+    def check_patient(self):
+        with get_session() as session:
+            self.controller.selected_patient = get_user_by_id(
+                session, self.controller.selected_patient_id
+            )
+            self.controller.show_frame(AppScreen.STATISTICS_DOCTOR.value)
 
     @staticmethod
     def get_btn_image():

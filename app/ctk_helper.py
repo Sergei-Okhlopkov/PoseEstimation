@@ -125,7 +125,7 @@ class SelectScrollFrame(ctk.CTkScrollableFrame):
 
     def choose_label(self, label_id):
         # Выбираем пациента
-        self.controller.selected_patient = label_id
+        self.controller.selected_patient_id = label_id
 
         # Красим выбранного, остальные приводим к дефолтному цвету
         for label in self.labels:
