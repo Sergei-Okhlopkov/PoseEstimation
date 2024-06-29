@@ -26,13 +26,14 @@ class ReabilitationApp(ctk.CTk):
         # Данные о пользователе
         self.user: User = None
         self.selected_exercise: int = None
+        self.selected_patient_id: int = None
+        self.selected_patient: User = None
 
         # Основной фрейм
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.pack(fill="both", expand=True)
 
         # Создание дочерних фреймов
-        # self.create_frames()
         self.cur_screen = None
         self.frames = {
             AppScreen.REGISTRATION.value: RegistrationScreen,

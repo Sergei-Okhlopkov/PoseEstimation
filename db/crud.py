@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import select, update, and_
 from sqlalchemy.orm import Session
 
 from db.database import get_session
 from db.hash_password import get_hash
-from db.models import User, MedSession
+from db.models import User, MedSession, Comment
 from db.schemas import Doctor, MedSessionUpdate
 from enums import UserType
 
@@ -17,6 +17,34 @@ def create_user(session: Session, user: User):
     return user
 
 
+def create_comment(session: Session, comment: Comment):
+    session.add(comment)
+    session.flush()
+    session.commit()
+
+
+def get_last_comment_by_exercise_for_user(
+    session: Session,
+    excercise_type: int,
+    user_id: int,
+) -> Comment | None:
+    # stmt = (
+    #     select(Comment)
+    #     .where(
+    #         and_(Comment.user_id == user_id, Comment.exercise_type == excercise_type)
+    #     )
+    #     .order_by(Comment.date.desc())
+    # )
+    comment = (
+        session.query(Comment)
+        .filter_by(user_id=user_id, exercise_type=excercise_type)
+        .order_by(Comment.date.desc())
+        .one_or_none()
+    )
+    return comment
+    # return session.execute(stmt).one_or_none()
+
+
 def get_doctors(session: Session) -> List[Doctor]:
     stmt = select(User).where(User.user_type == UserType.Doctor.value)
     result = session.execute(stmt)
@@ -26,7 +54,6 @@ def get_doctors(session: Session) -> List[Doctor]:
 
 def create_med_session(session: Session, med_session: MedSession) -> MedSession:
     session.add(med_session)
-    # session.flush()
     session.commit()
     session.refresh(med_session)
     return med_session
@@ -116,7 +143,7 @@ def fill_db_data():
                 last_name="Охлопков",
                 first_name="Сергей",
                 patronymic="Михайлович",
-                login="sergei",
+                login="ser",
                 password=get_hash("123"),
                 email="sergei@mail.ru",
                 user_type=1,

@@ -2,8 +2,9 @@ from pathlib import Path
 from PIL import Image
 import customtkinter as ctk
 
+from app.screens.helpers.all_helper import get_btn_image
 from app.videoplayer import VideoPlayer
-from enums import AppColor, Color, ExerciseType
+from enums import AppColor, Color, ExerciseType, AppScreen
 from recognition.render import bgr_to_hex
 
 TOOL_BTN_SIZE = 250
@@ -209,6 +210,19 @@ class ExerciseScreen(ctk.CTkFrame):
         video_tool_stripe.pack(fill="x")
         video_tool_stripe.pack_propagate(False)
 
+        cross = get_btn_image()
+
+        cross_btn = ctk.CTkButton(
+            video_tool_stripe,
+            text=None,
+            image=cross,
+            width=20,
+            fg_color="transparent",
+            command=lambda: self.close_exercises(),
+        )
+        # TODO: поменять вёрстку кнопки закрытия
+        cross_btn.place(relx=1.0, rely=0.0, anchor="ne")
+
         control_btns = ctk.CTkFrame(video_tool_stripe, fg_color="transparent")
         control_btns.pack(anchor="center")
 
@@ -311,6 +325,10 @@ class ExerciseScreen(ctk.CTkFrame):
             fg_color="transparent",
             command=lambda: self.set_exercise(ExerciseType.LEANING_FORWARD.value),
         ).pack(side="left", padx=(60, 0))
+
+    def close_exercises(self):
+        self.videoplayer.on_stop_grab()
+        self.controller.show_frame(AppScreen.MAIN_PATIENT.value)
 
     def update_shoulders_angle(self, values):
         self.l_shoulder_angle.configure(text=f"{values[0]}")

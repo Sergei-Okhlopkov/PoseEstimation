@@ -4,6 +4,7 @@ import customtkinter as ctk
 from PIL import Image
 
 from app.ctk_helper import make_frame, make_btn
+from app.screens.helpers.all_helper import get_btn_image
 from enums import AppColor, AppScreen
 
 BTN_SIZE = 300
@@ -49,13 +50,3 @@ class MainPatientScreen(ctk.CTkFrame):
         btns_frame.place(relx=0.5, rely=0.5, anchor="center")
         exercises_btn.pack(side="left", padx=[0, 60])
         statistics_btn.pack(side="left")
-
-
-def get_btn_image():
-    # Получаем путь к директории скрипта
-    script_dir = Path(__file__).parent.parent
-
-    # Формируем путь к файлу изображения
-    path = script_dir / "images"
-
-    return ctk.CTkImage(Image.open(path / "cross.png"), size=(20, 20))

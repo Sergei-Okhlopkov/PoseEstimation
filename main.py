@@ -1,7 +1,9 @@
+import asyncio
+
 import customtkinter as ctk
 
 from app.ctk_helper import make_frame
-from app.videoplayer import VideoPlayer
+from app.videoplayer_test import VideoPlayer
 from db.crud import create_user
 from db.database import Base, engine, SessionLocal
 from db.models import User
@@ -126,14 +128,15 @@ if __name__ == "__main__":
         "update_elbows_angle": update_elbows_angle,
     }
     # Создаем экземпляр класса VideoPlayer
-    video_player = VideoPlayer(app, canvas, video_tool_stripe, callbacks)
-    user = User(
-        first_name="Сергей",
-        last_name="Охлопков",
-        patronymic="",
-        login="myrza",
-        password="123",
-        email="s_okhlopkov@mail.ru",
-    )
-    create_user(SessionLocal(), user)
+    video_player = VideoPlayer(app, canvas, callbacks)
+    update_task = asyncio.create_task(video_player.update_video())
+    # user = User(
+    #     first_name="Сергей",
+    #     last_name="Охлопков",
+    #     patronymic="",
+    #     login="myrza",
+    #     password="123",
+    #     email="s_okhlopkov@mail.ru",
+    # )
+    # create_user(SessionLocal(), user)
     app.mainloop()

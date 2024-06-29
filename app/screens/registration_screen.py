@@ -175,6 +175,7 @@ class RegistrationScreen(ctk.CTkFrame):
 
         # endregion
 
+    # TODO: в связи со сменой Entry на CTkEntry передалать код с patronymic_entry
     def reg(self):
         patronymic = None
         if self.patronymic_entry.get() != PATRONYMIC_PLACEHOLDER:

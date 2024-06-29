@@ -1,4 +1,9 @@
 import numpy as np
+import csv
+import time
+from pylsl import StreamInlet, resolve_streams
+
+recording = True
 
 
 def get_angle(landmarks):
@@ -26,7 +31,7 @@ def get_angle(landmarks):
 
 
 # TODO: сделать из нескольких функций расчёта углов одну, в которую передаётся параметр
-def get_shoulders_angles(landmarks):
+def get_shoulders_angles(landmarks, revert=False):
     if landmarks:
         right_shoulder = [
             landmarks.landmark[14],
@@ -134,3 +139,26 @@ def get_middle_coordinates(x0, y0, x1, y1):
     xm = int((x0 + x1) / 2)
     ym = int((y0 + y1) / 2)
     return xm, ym
+
+
+def read_eeg_lsl():
+    streams = resolve_streams()
+    if not streams:
+        exit(1)
+
+    eeg_stream = streams[0]
+    inlet = StreamInlet(eeg_stream)
+
+    with open("eeg_data.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(
+            ["Timestamp"] + [f"Channel {i+1}" for i in range(eeg_stream.channel_count)]
+        )
+
+        # Получаем и записываем данные ЭЭГ
+        try:
+            while True and recording:
+                sample, timestamp = inlet.pull_sample()
+                writer.writerow([timestamp] + sample)
+        except Exception:
+            print("Stopping EEG data recording.")

@@ -9,7 +9,6 @@ from enums import ExerciseType
 int_pk = Annotated[int, mapped_column(primary_key=True)]
 
 
-# TODO: переделать визуальную модель в *.md файле
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int_pk]

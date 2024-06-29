@@ -1,4 +1,8 @@
+import asyncio
 import datetime
+import queue
+import threading
+import customtkinter as ctk
 
 import cv2
 import time
@@ -67,11 +71,101 @@ class VideoPlayer:
         self.start_time = time.time()
 
         # Запускаем метод для обновления видео каждые 30 миллисекунд
-        self.update_video()
 
-    def on_stop_grab(self):
-        self.capture.release()
-        cv2.destroyAllWindows()
+        self.frame_buffer = asyncio.Queue()
+        self.task = asyncio.create_task(self.read_and_process_frames())
+
+        # self.frame_queue = queue.Queue()
+        # self.read_thread = threading.Thread(target=self.read_and_process_frames)
+        # self.process_thread = threading.Thread(target=self.process_frames)
+        # self.read_thread.start()
+        # self.process_thread.start()
+        # self.update_video()
+
+    async def update_video(self):
+        while True:
+            if not self.frame_buffer.empty():
+                frame = await self.frame_buffer.get()  # Получаем кадр из очереди
+                frame = cv2.flip(frame, 1)
+                processed_frame = self.process_frame(frame)  # Обрабатываем кадр
+                # Конвертируем обработанный кадр в формат, подходящий для Canvas
+                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # Создаем объект Image из массива байтов кадра
+                image = Image.fromarray(image)
+                # Пропорционально изменяем размер изображения
+                # Масштабируем изображение до размеров Canvas
+                image = self.resize_and_keep_ratio(image, CANVAS_WIDTH, CANVAS_HEIGHT)
+                # Преобразуем изображение в объект PhotoImage для отображения в Canvas
+                photo = ImageTk.PhotoImage(image=image)
+                self.canvas.delete("video_frame")  # Удаляем предыдущий кадр
+                self.canvas.create_image(
+                    0, 0, anchor=customtkinter.NW, image=photo, tags="video_frame"
+                )
+
+                self.frame_buffer.task_done()  # Отмечаем, что задача для этого кадра завершена
+            else:
+                # Если очередь пуста, делаем паузу на короткое время
+                self.canvas.after(10, self.process_frames)
+
+    def process_frame(self, frame):
+        """
+        Эта функция обрабатывает один кадр видео с помощью Mediapipe и BlazePose.
+        Она принимает на вход кадр видео и возвращает обработанный кадр.
+        """
+        pose = recognize_pose(frame)
+
+        self.shoulders_angles = get_shoulders_angles(pose.pose_landmarks)
+        self.elbows_angles = get_elbows_angles(pose.pose_landmarks, revert=True)
+        self.hips_angles = get_hips_angles(pose.pose_landmarks, revert=True)
+        self.knees_angles = get_knees_angles(pose.pose_landmarks, revert=True)
+
+        if pose.pose_landmarks and self.draw_pose:
+            # Отрисовка позы
+            draw_pose(frame, pose.pose_landmarks, mpPose, highlited_joints)
+
+        return frame
+
+    async def read_and_process_frames(self):
+        """
+        Эта функция читает кадры с веб-камеры и помещает их в очередь.
+        Она работает в отдельном потоке.
+        """
+
+        while True:
+            ret, frame = await self.capture.read()  # Читаем кадр с веб-камеры
+            if not ret:
+                # Если чтение кадра не удалось, выходим из цикла
+                break
+            await self.frame_buffer.put(frame)  # Добавляем кадр в очередь
+
+    async def process_frames(self):
+        """
+        Эта функция получает кадры из очереди, обрабатывает их с помощью Mediapipe и BlazePose,
+        а затем отображает обработанные кадры в Canvas. Она работает в отдельном потоке.
+        """
+        while True:
+            if not self.frame_queue.empty():
+                frame = await self.frame_buffer.get()  # Получаем кадр из очереди
+                frame = cv2.flip(frame, 1)
+                processed_frame = self.process_frame(frame)  # Обрабатываем кадр
+                # Конвертируем обработанный кадр в формат, подходящий для Canvas
+                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # Создаем объект Image из массива байтов кадра
+                image = Image.fromarray(image)
+                # Пропорционально изменяем размер изображения
+                # Масштабируем изображение до размеров Canvas
+                image = self.resize_and_keep_ratio(image, CANVAS_WIDTH, CANVAS_HEIGHT)
+                # Преобразуем изображение в объект PhotoImage для отображения в Canvas
+                photo = ImageTk.PhotoImage(image=image)
+                self.canvas.delete("video_frame")  # Удаляем предыдущий кадр
+                self.canvas.create_image(
+                    0, 0, anchor=customtkinter.NW, image=photo, tags="video_frame"
+                )
+
+                self.frame_queue.task_done()  # Отмечаем, что задача для этого кадра завершена
+            else:
+                # Если очередь пуста, делаем паузу на короткое время
+                self.canvas.after(10, self.process_frames)
 
     def draw_pose_switch(self):
         if self.draw_pose:
@@ -243,7 +337,6 @@ class VideoPlayer:
         if angle > self.max_angle:
             self.max_angle = int(angle)
 
-        # TODO: улучшить систему сбора скорости поднятия
         if speed_up > 0:
             self.avg_speed = int((self.avg_speed + speed_up) / 2)
 

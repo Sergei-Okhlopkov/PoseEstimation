@@ -1,6 +1,25 @@
+from datetime import datetime
+from typing import List
+
 import customtkinter as ctk
 from pathlib import Path
+
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 from app.ctk_helper import make_frame, make_entry
+from app.screens.helpers.statistics_helper import (
+    exercise_types,
+    get_dynamic,
+    get_graph_data,
+)
+from db.crud import (
+    get_user_by_id,
+    get_user_med_sessions_by_exercise_type,
+    create_comment,
+)
+from db.database import get_session
+from db.models import MedSession, Comment
 from enums import AppColor, AppScreen
 from PIL import Image
 
@@ -11,12 +30,23 @@ FONT = "Inter"
 class StatisticsDoctorScreen(ctk.CTkFrame):
     def __init__(self, controller, parent):
         super().__init__(parent, fg_color=AppColor.MAIN.value)
+        self.controller = controller
         self.patient_name_lbl: str = None
         self.current_date_lbl: str = None
         self.dynamic_direction_lbl = None
         self.exercise_lbl: str = None
         self.patient_id_lbl: int = None
+        self.canvas: FigureCanvasTkAgg = None
+        self.fig, self.axes = plt.subplots()
 
+        self.last_date: str = "—"
+        self.patient_name: str = "Не указан"
+        self.exercise_name: str = None
+        self.selected_exercise: int = 0  # начинаем показ с первого упражнения
+        self.exercise_data: List[List[MedSession]] = None
+
+        # загрузка данных перед показом
+        self.load_data()
         # Изображения для кнопок
         arrow_left, arrow_right, cross = get_btns_images()
 
@@ -46,11 +76,12 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
         comment_area.grid_columnconfigure(list(range(12)), weight=1)
         comment_area.grid_rowconfigure(list(range(1)), weight=1)
 
-        comment_entry = make_entry(
+        self.comment_entry = make_entry(
             comment_area,
             "Комментарий к упражнению",
             font_size=24,
-        ).grid(row=0, column=0, columnspan=11, sticky="ew")
+        )
+        self.comment_entry.grid(row=0, column=0, columnspan=11, sticky="ew")
 
         # comment_entry.pack(side="left", fill="x")
 
@@ -62,6 +93,7 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
             text_color=AppColor.WHITE.value,
             corner_radius=20,
             font=(FONT, 28, "bold"),
+            command=self.add_comment,
         )
         comment_btn.grid(row=0, column=11)
 
@@ -83,24 +115,23 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
         info_frame.pack(side="left", anchor="nw", padx=(PAD, 0), pady=(60, 30))
 
         # region CANVAS
-        canvas_frame = make_frame(
+        self.canvas_frame = make_frame(
             statistics_area,
+            height=570,
+            width=920,
             color=AppColor.MAIN.value,
             corner_radius=20,
         )
-        canvas = ctk.CTkCanvas(
-            master=canvas_frame,
-            bg=AppColor.MAIN.value,
-            height=700,
-            width=1250,
-            borderwidth=0,
-            highlightthickness=0,
+
+        self.canvas = FigureCanvasTkAgg(
+            self.fig,
+            master=self.canvas_frame,
         )
 
         # PACK
-        canvas_frame.pack(side="left", anchor="nw", padx=(40, 0), pady=(60, 30))
+        self.canvas_frame.pack(side="left", anchor="nw", padx=(40, 0), pady=(60, 30))
+        self.canvas_frame.pack_propagate(False)
         cross_btn.pack(anchor="n", pady=10, padx=10)
-        canvas.pack(pady=10, padx=10)
 
         # endregion
 
@@ -116,7 +147,7 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
 
         self.patient_name_lbl = ctk.CTkLabel(
             info_frame,
-            text="Охлопков Сергей Михайлович",
+            text=self.patient_name,
             font=(
                 "Arial",
                 24,
@@ -145,7 +176,7 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
 
         self.patient_id_lbl = ctk.CTkLabel(
             id_frame,
-            text="7879987437581",
+            text="-",
             font=(
                 "Arial",
                 24,
@@ -168,7 +199,7 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
 
         self.current_date_lbl = ctk.CTkLabel(
             info_frame,
-            text="05.03.2024",
+            text=self.last_date,
             font=(
                 "Arial",
                 24,
@@ -197,7 +228,7 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
 
         self.dynamic_direction_lbl = ctk.CTkLabel(
             info_frame,
-            text="положительная",
+            text="-",
             font=(
                 "Arial",
                 24,
@@ -224,16 +255,19 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
             width=60,
             fg_color="transparent",
             border_width=0,
+            command=self.prev_exercise,
         ).grid(sticky="w", column=0, row=0, padx=(0, 20))
 
         self.exercise_lbl = ctk.CTkLabel(
             choose_exercise_frame,
-            text="Отведение левой руки",
+            text=exercise_types[self.selected_exercise][0],
             font=("Arial", 24, "bold"),
             text_color=AppColor.WHITE.value,
             wraplength=200,
             justify="left",
-        ).grid(sticky="w", column=1, row=0)
+        )
+
+        self.exercise_lbl.grid(sticky="w", column=1, row=0)
 
         right_btn = ctk.CTkButton(
             choose_exercise_frame,
@@ -241,8 +275,133 @@ class StatisticsDoctorScreen(ctk.CTkFrame):
             image=arrow_right,
             width=60,
             fg_color="transparent",
+            command=self.next_exercise,
         ).grid(sticky="e", column=2, row=0, padx=(20, 0))
+
+        self.update_interface()
         # endregion
+
+    def load_data(self):
+        # with get_session() as session:
+        #     patient = get_user_by_id(session, self.controller.selected_patient_id)
+        patient = self.controller.selected_patient
+
+        full_name = f"{patient.last_name} {patient.first_name}"
+        if patient.patronymic is not None:
+            full_name += f" {patient.patronymic}"
+
+        self.patient_name = full_name
+        self.exercise_name = exercise_types[self.selected_exercise][0]
+
+        # загрузка данных по упражнениям
+        self.load_exercise_data()
+
+    def load_exercise_data(self):
+        exercises = []
+        for ex_type in exercise_types:
+            with get_session() as session:
+                ex_data = get_user_med_sessions_by_exercise_type(
+                    session,
+                    self.controller.selected_patient_id,
+                    ex_type[1],  # ex_type(ex_name, ex_enum_type)
+                )
+
+            exercises.append([med_session for med_session in ex_data])
+        self.exercise_data = exercises
+
+    def update_interface(self):
+        fig = self.fig
+        ax = self.axes
+
+        # Установим id пациента
+        self.patient_id_lbl.configure(text=self.controller.selected_patient_id)
+
+        # Установим название упражнения
+        self.exercise_lbl.configure(text=exercise_types[self.selected_exercise][0])
+
+        if self.exercise_data[self.selected_exercise]:
+            date = self.exercise_data[self.selected_exercise][-1].finished_at.strftime(
+                "%Y-%m-%d"
+            )
+            # Установим дату последнего занятия
+            self.current_date_lbl.configure(text=date)
+
+            # Определим динамику последних 5 занятий
+            dynamic = get_dynamic(self.exercise_data[self.selected_exercise])
+            self.dynamic_direction_lbl.configure(text=dynamic)
+
+            graph_data = get_graph_data(self.exercise_data, self.selected_exercise)
+
+            # Установка отступов
+            plt.subplots_adjust(
+                left=0.05, bottom=0.1, right=0.95, top=0.95, wspace=0, hspace=0
+            )
+
+            # отображение графиков
+            ax.clear()
+            ax.plot(
+                graph_data.date,
+                graph_data.angle,
+                linewidth=3,
+                marker="o",
+                label="Максимальный угол отклонения",
+            )
+            ax.plot(
+                graph_data.date,
+                graph_data.speed,
+                linewidth=3,
+                marker="o",
+                label="Средняя скорость движения",
+            )
+
+            # Добавляем легенду
+            ax.legend(loc="upper left", fontsize=10, frameon=True)
+            plt.xlabel("Дата")
+            plt.ylabel("Угол")
+            ax.xaxis.label.set_color(AppColor.WHITE.value)
+            ax.yaxis.label.set_color(AppColor.WHITE.value)
+            ax.tick_params(axis="x", colors=AppColor.WHITE.value)
+            ax.tick_params(axis="y", colors=AppColor.WHITE.value)
+            ax.set_facecolor(AppColor.MAIN.value)
+
+            ax.spines["bottom"].set_color(AppColor.WHITE.value)
+            ax.spines["top"].set_color(AppColor.WHITE.value)
+            ax.spines["left"].set_color(AppColor.WHITE.value)
+            ax.spines["right"].set_color(AppColor.WHITE.value)
+
+            # Добавляем заголовок и подписи осей
+            plt.title(
+                "Статистика по упражнению за последние 10 занятий",
+                color=AppColor.WHITE.value,
+            )
+            plt.grid(True)
+
+            fig.set_facecolor(AppColor.MAIN.value)
+
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(fill="both", expand=True)
+            self.canvas.get_tk_widget().pack_configure(padx=10, pady=10)
+
+    def next_exercise(self):
+        if self.selected_exercise < 3:
+            self.selected_exercise += 1
+            self.update_interface()
+
+    def prev_exercise(self):
+        if self.selected_exercise > 0:
+            self.selected_exercise -= 1
+            self.update_interface()
+
+    def add_comment(self):
+        comment = Comment(
+            text=self.comment_entry.get(),
+            date=datetime.utcnow(),
+            user_id=self.controller.selected_patient_id,
+            exercise_type=self.selected_exercise,
+        )
+
+        with get_session() as session:
+            create_comment(session, comment)
 
 
 def get_btns_images():

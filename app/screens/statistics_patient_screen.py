@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import List, Tuple
+from typing import List
 import matplotlib.pyplot as plt
 
 import customtkinter as ctk
@@ -8,8 +7,16 @@ from pathlib import Path
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from app.ctk_helper import make_frame
-from app.screens.helpers.statistics_patient_helper import exercise_types
-from db.crud import get_user_by_id, get_user_med_sessions_by_exercise_type
+from app.screens.helpers.statistics_helper import (
+    exercise_types,
+    get_graph_data,
+    get_dynamic,
+)
+from db.crud import (
+    get_user_by_id,
+    get_user_med_sessions_by_exercise_type,
+    get_last_comment_by_exercise_for_user,
+)
 from db.database import get_session
 from db.models import MedSession
 from db.schemas import GraphData
@@ -32,9 +39,9 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         self.last_date: str = "—"
         self.doctor_name: str = "не указан"
         self.exercise_name: str = None
+        self.exercise_comment: str = None
         self.selected_exercise: int = 0  # начинаем показ с первого упражнения
         self.exercise_data: List[List[MedSession]] = None
-        self.exercise_data_test: List[Tuple[int, int, datetime]] = None
 
         # загрузка данных перед показом
         self.load_data()
@@ -186,7 +193,7 @@ class StatisticsPatientScreen(ctk.CTkFrame):
 
         self.spec_comment_lbl = ctk.CTkLabel(
             comment_frame,
-            text="Так держать, Сергей! Ещё пара занятий и вы сможете стабильно выполнять все действия.",
+            text=self.exercise_comment,
             font=(
                 "Arial",
                 20,
@@ -271,13 +278,20 @@ class StatisticsPatientScreen(ctk.CTkFrame):
         self.doctor_name = full_name
         self.exercise_name = exercise_types[self.selected_exercise][0]
 
+        with get_session() as session:
+            comment = get_last_comment_by_exercise_for_user(
+                session, self.controller.selected_exercise, self.controller.user.id
+            )
+            if comment is None:
+                self.exercise_comment = ""
+            else:
+                self.exercise_comment = comment.text
+
         # загрузка данных по упражнениям
         self.load_exercise_data()
 
-    # TODO: разобраться с азгружаемыми данными, что-то тут лишнее
     def load_exercise_data(self):
         exercises = []
-        exercises_test = []
         for ex_type in exercise_types:
             with get_session() as session:
                 ex_data = get_user_med_sessions_by_exercise_type(
@@ -285,39 +299,44 @@ class StatisticsPatientScreen(ctk.CTkFrame):
                     self.controller.user.id,
                     ex_type[1],  # ex_type(ex_name, ex_enum_type)
                 )
-                exercises.append(ex_data)
 
-            exercises_test.append(
-                [
-                    (
-                        med_session.max_angle,
-                        med_session.avg_speed,
-                        med_session.finished_at,
-                    )
-                    for med_session in ex_data
-                ]
-            )
-        self.exercise_data_test = exercises_test
+            exercises.append([med_session for med_session in ex_data])
         self.exercise_data = exercises
 
     def update_interface(self):
         fig = self.fig
         ax = self.axes
 
-        if self.exercise_data[self.selected_exercise]:
-            # Установим дату последнего занятия
-            self.last_date_lbl.configure(
-                text=self.exercise_data[self.selected_exercise][-1].finished_at.date()
-            )
+        # Установим название упражнения
+        self.exercise_lbl.configure(text=exercise_types[self.selected_exercise][0])
 
-            # Установим название упражнения
-            self.exercise_lbl.configure(text=exercise_types[self.selected_exercise][0])
+        # Установим последний комментарий
+        with get_session() as session:
+            comment = get_last_comment_by_exercise_for_user(
+                session, self.selected_exercise, self.controller.user.id
+            )
+            if comment is None:
+                self.spec_comment_lbl.configure(text="")
+            else:
+                self.spec_comment_lbl.configure(text=comment.text)
+
+        if self.exercise_data[self.selected_exercise]:
+
+            date = self.exercise_data[self.selected_exercise][-1].finished_at.strftime(
+                "%Y-%m-%d"
+            )
+            # Установим дату последнего занятия
+            self.last_date_lbl.configure(text=date)
+            # Установим дату последнего занятия
+            # self.last_date_lbl.configure(
+            #     text=self.exercise_data[self.selected_exercise][-1].finished_at.date()
+            # )
 
             # Определим динамику последних 5 занятий
             dynamic = get_dynamic(self.exercise_data[self.selected_exercise])
             self.dynamic_direction_lbl.configure(text=dynamic)
 
-            graph_data = get_graph_data(self.exercise_data_test, self.selected_exercise)
+            graph_data = get_graph_data(self.exercise_data, self.selected_exercise)
 
             # Установка отступов
             plt.subplots_adjust(
@@ -343,6 +362,8 @@ class StatisticsPatientScreen(ctk.CTkFrame):
 
             # Добавляем легенду
             ax.legend(loc="upper left", fontsize=10, frameon=True)
+            plt.xlabel("Дата")
+            plt.ylabel("Угол")
             ax.xaxis.label.set_color(AppColor.WHITE.value)
             ax.yaxis.label.set_color(AppColor.WHITE.value)
             ax.tick_params(axis="x", colors=AppColor.WHITE.value)
@@ -390,36 +411,3 @@ def get_btns_images():
     cross = ctk.CTkImage(Image.open(path / "cross.png"), size=(20, 20))
 
     return arrow_left, arrow_right, cross
-
-
-def get_dynamic(data) -> str:
-    overall_dynamics = 0
-
-    data = data[(len(data) - 5) : len(data)]  # берём последние 5 элементов массива
-    for i in range(1, len(data)):
-        if data[i].max_angle > data[i - 1].max_angle:
-            overall_dynamics += 1
-        if data[i].max_angle < data[i - 1].max_angle:
-            overall_dynamics -= 1
-
-        if data[i].avg_speed > data[i - 1].avg_speed:
-            overall_dynamics += 1
-        if data[i].avg_speed < data[i - 1].avg_speed:
-            overall_dynamics -= 1
-
-    if overall_dynamics > 0:
-        return "положительная"
-    elif overall_dynamics < 0:
-        return "отрицательная"
-    else:
-        return "—"
-
-
-def get_graph_data(exercise_data, exercise_num) -> GraphData:
-    graph_data = GraphData(angle=[], speed=[], date=[])
-    for session_info in exercise_data[exercise_num]:
-        graph_data.angle.append(session_info[0])
-        graph_data.speed.append(session_info[1])
-        graph_data.date.append(session_info[2])
-
-    return graph_data
